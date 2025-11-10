@@ -408,7 +408,7 @@ const Index = () => {
             <Card className="p-6 text-center bg-card border-border">
               <Clock className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Horário</h3>
-              <p className="text-muted-foreground">Seg - Sex: 🕘 8h às 12h e 🕓 14h às 18h 🕕</p>
+              <p className="text-muted-foreground">Segunda - Sexta: 🕘 8h às 12h e 🕓 14h às 18h 🕕</p>
             </Card>
           </div>
         </div>  
