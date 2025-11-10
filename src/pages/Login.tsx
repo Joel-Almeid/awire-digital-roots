@@ -1,23 +1,34 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import logoAwire from "@/assets/logo-awire.png";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // This is a placeholder - actual authentication will be implemented with backend
-    if (username && password) {
-      toast.success("Login realizado com sucesso!");
-    } else {
+    if (!username || !password) {
       toast.error("Por favor, preencha todos os campos.");
+      return;
+    }
+
+    const success = login(username, password);
+    
+    if (success) {
+      toast.success("Login realizado com sucesso!");
+      navigate("/admin");
+    } else {
+      toast.error("Credenciais inválidas. Tente novamente.");
     }
   };
 
