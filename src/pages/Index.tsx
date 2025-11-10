@@ -396,7 +396,7 @@ const Index = () => {
             <Card className="p-6 text-center bg-card border-border">
               <Mail className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Email</h3>
-              <p className="text-muted-foreground">awire@ifto.edu.br</p>
+              <p className="text-muted-foreground">awiredigital@gmail.com</p>
             </Card>
 
             <Card className="p-6 text-center bg-card border-border">
