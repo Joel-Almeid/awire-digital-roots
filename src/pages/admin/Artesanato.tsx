@@ -120,10 +120,10 @@ const Artesanato = () => {
                 />
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Categoria" />
+                <SelectTrigger className="bg-background border-border">
+                  <SelectValue placeholder="Todas Categorias" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card border-border">
                   <SelectItem value="all">Todas Categorias</SelectItem>
                   <SelectItem value="adornos">Adornos</SelectItem>
                   <SelectItem value="utilitarios">Utilitários</SelectItem>
@@ -131,10 +131,10 @@ const Artesanato = () => {
                 </SelectContent>
               </Select>
               <Select value={aldeiaFilter} onValueChange={setAldeiaFilter}>
-                <SelectTrigger className="bg-background">
-                  <SelectValue placeholder="Aldeia" />
+                <SelectTrigger className="bg-background border-border">
+                  <SelectValue placeholder="Todas Aldeias" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card border-border">
                   <SelectItem value="all">Todas Aldeias</SelectItem>
                   <SelectItem value="canoana">Canoanã</SelectItem>
                   <SelectItem value="txuiri">Txuiri</SelectItem>

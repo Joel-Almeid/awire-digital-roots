@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,6 @@ import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import Lightbox from "@/components/Lightbox";
 
 import cocar from "@/assets/cocar.jpg";
 import colar from "@/assets/colar.jpg";
@@ -15,7 +15,7 @@ import pulseira from "@/assets/pulseira.jpg";
 import heroBackground from "@/assets/hero-background.jpg";
 
 const Artesanato = () => {
-  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("todas");
   const [aldeiaFilter, setAldeiaFilter] = useState("todas");
@@ -169,13 +169,10 @@ const Artesanato = () => {
                 {filteredCrafts.map((craft, index) => (
                   <Card
                     key={craft.id}
-                    className="overflow-hidden bg-card border-border hover-lift cursor-pointer animate-fade-in"
+                    className="overflow-hidden bg-card border-border hover-lift animate-fade-in"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <div
-                      className="aspect-square overflow-hidden"
-                      onClick={() => setLightboxImage(craft.image)}
-                    >
+                    <div className="aspect-square overflow-hidden">
                       <img
                         src={craft.image}
                         alt={craft.name}
@@ -189,7 +186,10 @@ const Artesanato = () => {
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{craft.category}</span>
                         <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">{craft.aldeia}</span>
                       </div>
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                      <Button 
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                        onClick={() => navigate(`/artesanato/${craft.id}`)}
+                      >
                         Ver Detalhes
                       </Button>
                     </div>
@@ -202,14 +202,6 @@ const Artesanato = () => {
       </section>
 
       <Footer />
-
-      {/* Lightbox */}
-      {lightboxImage && (
-        <Lightbox
-          image={lightboxImage}
-          onClose={() => setLightboxImage(null)}
-        />
-      )}
     </div>
   );
 };
