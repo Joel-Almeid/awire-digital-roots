@@ -8,11 +8,16 @@ const Footer = () => {
     <footer className="bg-green-dark border-t border-border">
       <div className="container mx-auto px-4 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-          {/* Logo and Info */}
-          <div className="space-y-4">
-            <img src={logoAwire} alt="AWIRE DIGITAL" className="h-16 w-auto" />
-            <h3 className="text-lg font-bold text-foreground">PROJETO AWIRE DIGITAL</h3>
-            <p className="text-sm text-muted-foreground">Inclusão Digital na Ilha do Bananal</p>
+          {/* Logo and Info - Horizontal Layout */}
+          <div className="lg:col-span-1">
+            <div className="flex items-center gap-4">
+              <img src={logoAwire} alt="AWIRE DIGITAL" className="h-16 w-auto flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-bold text-foreground leading-tight">PROJETO AWIRE DIGITAL</h3>
+                <p className="text-xs text-muted-foreground">Inclusão Digital na Ilha do Bananal</p>
+              </div>
+              <img src={logoIfto} alt="IFTO" className="h-16 w-auto flex-shrink-0" />
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -37,7 +42,7 @@ const Footer = () => {
                   <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">IFTO</span>
                 </a>
               </li>
-              <li><span className="text-sm text-muted-foreground">FUNAI</span></li>
+              <li><span className="text-sm text-muted-foreground">NEABI_FORMOSO</span></li>
               <li><span className="text-sm text-muted-foreground">Secretaria de Cultura</span></li>
             </ul>
           </div>
