@@ -42,7 +42,7 @@ const Footer = () => {
                   <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">IFTO</span>
                 </a>
               </li>
-              <li><span className="text-sm text-muted-foreground">FUNAI</span></li>
+              <li><span className="text-sm text-muted-foreground">NEABI_FORMOSO</span></li>
               <li><span className="text-sm text-muted-foreground">Secretaria de Cultura</span></li>
             </ul>
           </div>
