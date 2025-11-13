@@ -13,12 +13,21 @@ import foto5 from "@/assets/foto-5.jpg";
 import foto6 from "@/assets/foto-6.jpg";
 import foto7 from "@/assets/foto-7.jpg";
 import foto8 from "@/assets/foto-8.jpg";
+import foto9 from "@/assets/foto-9.jpg";
+import foto10 from "@/assets/foto-10.jpg";
+import foto11 from "@/assets/foto-11.jpg";
+import foto12 from "@/assets/foto-12.jpg";
+import foto13 from "@/assets/foto-13.jpg";
+import foto14 from "@/assets/foto-14.jpg";
+import foto15 from "@/assets/foto-15.jpg";
+import foto16 from "@/assets/foto-16.jpg";
 
 const Fotos = () => {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   const galleryItems = [
     { type: "video" as const, src: "/videos/projeto-video.mp4", alt: "Vídeo do Projeto AWIRE DIGITAL" },
+    { type: "video" as const, src: "/videos/projeto-video-2.mp4", alt: "Vídeo das atividades do Projeto AWIRE DIGITAL" },
     { type: "image" as const, src: foto1, alt: "Apresentação do Projeto AWIRE DIGITAL" },
     { type: "image" as const, src: foto2, alt: "Equipe do projeto navegando no rio" },
     { type: "image" as const, src: foto3, alt: "Estudantes em aula de educação digital" },
@@ -27,6 +36,14 @@ const Fotos = () => {
     { type: "image" as const, src: foto6, alt: "Laboratório de informática na aldeia" },
     { type: "image" as const, src: foto7, alt: "Professor apresentando conteúdo digital" },
     { type: "image" as const, src: foto8, alt: "Alunos em atividade de alfabetização digital" },
+    { type: "image" as const, src: foto9, alt: "Equipe do projeto com os alunos" },
+    { type: "image" as const, src: foto10, alt: "Membros da equipe no veículo" },
+    { type: "image" as const, src: foto11, alt: "Aula em laboratório de informática" },
+    { type: "image" as const, src: foto12, alt: "Estudantes em aula prática de informática" },
+    { type: "image" as const, src: foto13, alt: "Entrega de materiais aos participantes" },
+    { type: "image" as const, src: foto14, alt: "Apresentação cultural na escola" },
+    { type: "image" as const, src: foto15, alt: "Foto em grupo dos participantes do projeto" },
+    { type: "image" as const, src: foto16, alt: "Trio recebendo materiais do projeto" },
   ];
 
   return (
