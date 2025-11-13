@@ -49,7 +49,7 @@ Ao adquirir esta peça, você não apenas leva para casa um artesanato de qualid
       <WhatsAppButton />
 
       {/* Breadcrumb */}
-      <section className="bg-secondary/30 py-6">
+      <section className="bg-secondary/30 py-6 mt-20">
         <div className="container mx-auto px-4 lg:px-8">
           <Link to="/artesanato" className="inline-flex items-center text-primary hover:text-primary/80 transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
