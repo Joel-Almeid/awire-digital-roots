@@ -1,20 +1,32 @@
-import { MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// src/components/WhatsAppButton.tsx
+
+import { FaWhatsapp } from "react-icons/fa";
 
 const WhatsAppButton = () => {
-  const handleClick = () => {
-    window.open("https://wa.me/5563992747396", "_blank");
-  };
+
+  const defaultMessage = encodeURIComponent(
+    "Olá! Visitei o site Awire Digital e gostaria de mais informações."
+  );
+
+  const whatsappLink = `https://wa.me/5563992747396?text=${defaultMessage}`;
 
   return (
-    <Button
-      onClick={handleClick}
-      className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-green-light hover:bg-green-light/90 shadow-lg hover-glow"
-      size="icon"
-      aria-label="Contato via WhatsApp"
+    <a
+      href={whatsappLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Contato WhatsApp AWIRE DIGITAL"
+      
+      className="
+        fixed bottom-8 right-8 z-50
+        w-20 h-20        
+        bg-[#25D366]
+        rounded-full flex items-center justify-center
+        shadow-lg hover-lift hover:bg-green-700 transition-all
+      "
     >
-      <MessageCircle className="h-6 w-6" />
-    </Button>
+      <FaWhatsapp className="w-14 h-14 text-black" />   {/* 🔥 ícone maior */}
+    </a>
   );
 };
 

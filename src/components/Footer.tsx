@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Instagram, Facebook, Mail, MapPin } from "lucide-react";
 import logoAwire from "@/assets/logo-awire.png";
 import logoIfto from "@/assets/logo-ifto.png";
+import logoNEABI from "@/assets/logo-neabi.png";
 
 const Footer = () => {
   return (
@@ -37,12 +38,27 @@ const Footer = () => {
             <h4 className="text-base font-semibold text-foreground mb-4">Instituições</h4>
             <ul className="space-y-3">
               <li>
-                <a href="https://www.ifto.edu.br/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">
+                
+                <a href="https://portal.ifto.edu.br/formoso" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">
                   <img src={logoIfto} alt="IFTO" className="h-8 w-8" />
                   <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">IFTO</span>
                 </a>
               </li>
-              <li><span className="text-sm text-muted-foreground">NEABI_FORMOSO</span></li>
+
+              <li>
+      <a 
+        href="https://www.instagram.com/neabiformoso?igsh=MTd1MXJqbmZsOWRjbQ=="  
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="flex items-center gap-2 group"
+      >
+        {/* Logo NEABI*/}
+        <img src={logoNEABI} alt="Logo NEABI Formoso" className="h-8 w-8" />
+        <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">NEABI_FORMOSO</span>
+      </a>
+    </li>
+
+
               <li><span className="text-sm text-muted-foreground">Secretaria de Cultura</span></li>
             </ul>
           </div>
@@ -81,7 +97,7 @@ const Footer = () => {
             </p>
             <div className="flex items-center gap-4 text-sm">
               <Link to="/login" className="text-muted-foreground hover:text-primary transition-colors">
-                Login do Admin
+                Login
               </Link>
               <span className="text-muted-foreground">•</span>
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
