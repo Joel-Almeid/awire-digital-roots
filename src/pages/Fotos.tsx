@@ -5,29 +5,28 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import Lightbox from "@/components/Lightbox";
 
 import heroBackground from "@/assets/hero-background.jpg";
-import sectionBg1 from "@/assets/section-background-1.jpg";
-import sectionBg2 from "@/assets/section-background-2.jpg";
-import sectionBg3 from "@/assets/section-background-3.jpg";
-import cocar from "@/assets/cocar.jpg";
-import colar from "@/assets/colar.jpg";
-import pulseira from "@/assets/pulseira.jpg";
+import foto1 from "@/assets/foto-1.jpg";
+import foto2 from "@/assets/foto-2.jpg";
+import foto3 from "@/assets/foto-3.jpg";
+import foto4 from "@/assets/foto-4.jpg";
+import foto5 from "@/assets/foto-5.jpg";
+import foto6 from "@/assets/foto-6.jpg";
+import foto7 from "@/assets/foto-7.jpg";
+import foto8 from "@/assets/foto-8.jpg";
 
 const Fotos = () => {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
-  const photos = [
-    { src: heroBackground, alt: "Paisagem da Ilha do Bananal" },
-    { src: sectionBg1, alt: "Floresta Amazônica" },
-    { src: sectionBg2, alt: "Aldeia Indígena" },
-    { src: sectionBg3, alt: "Artesanato Indígena" },
-    { src: cocar, alt: "Cocar Tradicional" },
-    { src: colar, alt: "Colar de Miçangas" },
-    { src: pulseira, alt: "Pulseira Artesanal" },
-    { src: heroBackground, alt: "Natureza da Região" },
-    { src: sectionBg1, alt: "Rio na Ilha do Bananal" },
-    { src: sectionBg2, alt: "Comunidade Indígena" },
-    { src: sectionBg3, alt: "Arte e Cultura" },
-    { src: cocar, alt: "Artesanato Tradicional" },
+  const galleryItems = [
+    { type: "video" as const, src: "/videos/projeto-video.mp4", alt: "Vídeo do Projeto AWIRE DIGITAL" },
+    { type: "image" as const, src: foto1, alt: "Apresentação do Projeto AWIRE DIGITAL" },
+    { type: "image" as const, src: foto2, alt: "Equipe do projeto navegando no rio" },
+    { type: "image" as const, src: foto3, alt: "Estudantes em aula de educação digital" },
+    { type: "image" as const, src: foto4, alt: "Entrega de materiais do projeto" },
+    { type: "image" as const, src: foto5, alt: "Estudantes participando das atividades" },
+    { type: "image" as const, src: foto6, alt: "Laboratório de informática na aldeia" },
+    { type: "image" as const, src: foto7, alt: "Professor apresentando conteúdo digital" },
+    { type: "image" as const, src: foto8, alt: "Alunos em atividade de alfabetização digital" },
   ];
 
   return (
@@ -57,18 +56,29 @@ const Fotos = () => {
       <section className="py-20">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {photos.map((photo, index) => (
+            {galleryItems.map((item, index) => (
               <div
                 key={index}
-                className="aspect-square overflow-hidden rounded-lg shadow-md cursor-pointer hover-lift animate-fade-in"
+                className="aspect-square overflow-hidden rounded-lg shadow-md cursor-pointer hover-lift animate-fade-in relative"
                 style={{ animationDelay: `${index * 0.05}s` }}
-                onClick={() => setLightboxImage(photo.src)}
+                onClick={() => item.type === "image" && setLightboxImage(item.src)}
               >
-                <img
-                  src={photo.src}
-                  alt={photo.alt}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
+                {item.type === "video" ? (
+                  <video
+                    src={item.src}
+                    className="w-full h-full object-cover"
+                    controls
+                    preload="metadata"
+                  >
+                    Seu navegador não suporta vídeos.
+                  </video>
+                ) : (
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  />
+                )}
               </div>
             ))}
           </div>

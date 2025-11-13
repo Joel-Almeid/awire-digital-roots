@@ -12,6 +12,14 @@ import heroBackground from "@/assets/hero-background.jpg";
 import sectionBg1 from "@/assets/section-background-1.jpg";
 import sectionBg2 from "@/assets/section-background-2.jpg";
 import sectionBg3 from "@/assets/section-background-3.jpg";
+import foto1 from "@/assets/foto-1.jpg";
+import foto2 from "@/assets/foto-2.jpg";
+import foto3 from "@/assets/foto-3.jpg";
+import foto4 from "@/assets/foto-4.jpg";
+import foto5 from "@/assets/foto-5.jpg";
+import foto6 from "@/assets/foto-6.jpg";
+import foto7 from "@/assets/foto-7.jpg";
+import foto8 from "@/assets/foto-8.jpg";
 import cocar from "@/assets/cocar.jpg";
 import colar from "@/assets/colar.jpg";
 import pulseira from "@/assets/pulseira.jpg";
@@ -328,7 +336,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            {[sectionBg1, sectionBg2, sectionBg3, heroBackground, cocar, colar, pulseira, sectionBg1].map((img, index) => (
+            {[foto1, foto2, foto3, foto4, foto5, foto6, foto7, foto8].map((img, index) => (
               <div
                 key={index}
                 className="aspect-square overflow-hidden rounded-lg shadow-md cursor-pointer hover-lift"
@@ -392,24 +400,36 @@ const Index = () => {
             <div className="w-24 h-1 bg-primary mx-auto" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            <Card className="p-6 text-center bg-card border-border">
-              <Mail className="h-12 w-12 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Email</h3>
-              <p className="text-muted-foreground">awiredigital@gmail.com</p>
-            </Card>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <a href="mailto:awiredigital@gmail.com" className="block">
+              <Card className="p-6 text-center bg-card border-border hover:shadow-lg hover:border-primary transition-all cursor-pointer h-full">
+                <Mail className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="font-semibold text-foreground mb-2">Email</h3>
+                <p className="text-muted-foreground text-sm">awiredigital@gmail.com</p>
+              </Card>
+            </a>
 
-            <Card className="p-6 text-center bg-card border-border">
-              <Phone className="h-12 w-12 text-primary mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">WhatsApp</h3>
-              <p className="text-muted-foreground">+55 (63) 99274-7396</p>
-            </Card>
+            <a href="https://wa.me/5563992747396" target="_blank" rel="noopener noreferrer" className="block">
+              <Card className="p-6 text-center bg-card border-border hover:shadow-lg hover:border-primary transition-all cursor-pointer h-full">
+                <Phone className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="font-semibold text-foreground mb-2">WhatsApp</h3>
+                <p className="text-muted-foreground text-sm">+55 (63) 99274-7396</p>
+              </Card>
+            </a>
 
-            <Card className="p-6 text-center bg-card border-border">
+            <Card className="p-6 text-center bg-card border-border h-full">
               <Clock className="h-12 w-12 text-primary mx-auto mb-4" />
               <h3 className="font-semibold text-foreground mb-2">Horário</h3>
-              <p className="text-muted-foreground">Segunda - Sexta: 🕘 8h às 12h e 🕓 14h às 18h 🕕</p>
+              <p className="text-muted-foreground text-sm">Segunda - Sexta: 🕘 8h às 12h e 🕓 14h às 18h 🕕</p>
             </Card>
+
+            <a href="https://maps.app.goo.gl/PWJ5VMwjKf94jPe58" target="_blank" rel="noopener noreferrer" className="block">
+              <Card className="p-6 text-center bg-card border-border hover:shadow-lg hover:border-primary transition-all cursor-pointer h-full">
+                <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="font-semibold text-foreground mb-2">Endereço</h3>
+                <p className="text-muted-foreground text-sm">Instituto Federal do Tocantins - Campus Formoso do Araguaia, Rua do Açude/Lago municipal, s/n - Centro, Formoso do Araguaia - TO, 77470-000</p>
+              </Card>
+            </a>
           </div>
         </div>  
       </section> 
