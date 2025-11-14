@@ -18,12 +18,12 @@ const Navigation = () => {
   }, []);
 
   const navLinks = [
-    { title: "Sobre", href: "#sobre" },
-    { title: "Participantes", href: "#participantes" },
-    { title: "Arte Indígena", href: "#arte" },
-    { title: "Fotos", href: "#fotos" },
-    { title: "Contato", href: "#contato" },
-    { title: "Artesanato", href: "/artesanato" },
+    { title: "Sobre", to: "/#sobre" },
+    { title: "Participantes", to: "/#participantes" },
+    { title: "Arte Indígena", to: "/#arte" },
+    { title: "Fotos", to: "/#fotos" },
+    { title: "Contato", to: "/#contato" },
+    { title: "Artesanato", to: "/artesanato" },
   ];
 
   return (
@@ -46,23 +46,13 @@ const Navigation = () => {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
-              link.href.startsWith("#") ? (
-                <a
-                  key={link.title}
-                  href={link.href}
-                  className="text-sm font-medium text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
-                >
-                  {link.title}
-                </a>
-              ) : (
-                <Link
-                  key={link.title}
-                  to={link.href}
-                  className="text-sm font-medium text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
-                >
-                  {link.title}
-                </Link>
-              )
+              <Link
+                key={link.title}
+                to={link.to}
+                className="text-sm font-medium text-foreground hover:text-primary transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:scale-x-0 after:origin-left after:transition-transform hover:after:scale-x-100"
+              >
+                {link.title}
+              </Link>
             ))}
           </div>
 
@@ -83,25 +73,14 @@ const Navigation = () => {
         <div className="lg:hidden bg-background border-t border-border animate-fade-in">
           <div className="container mx-auto px-4 py-4 flex flex-col gap-4">
             {navLinks.map((link) => (
-              link.href.startsWith("#") ? (
-                <a
-                  key={link.title}
-                  href={link.href}
-                  className="text-base font-medium text-foreground hover:text-primary transition-colors py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.title}
-                </a>
-              ) : (
-                <Link
-                  key={link.title}
-                  to={link.href}
-                  className="text-base font-medium text-foreground hover:text-primary transition-colors py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.title}
-                </Link>
-              )
+              <Link
+                key={link.title}
+                to={link.to}
+                className="text-base font-medium text-foreground hover:text-primary transition-colors py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.title}
+              </Link>
             ))}
           </div>
         </div>

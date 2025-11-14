@@ -18,16 +18,6 @@ import foto3 from "@/assets/foto-3.jpg";
 import foto4 from "@/assets/foto-4.jpg";
 import foto5 from "@/assets/foto-5.jpg";
 import foto6 from "@/assets/foto-6.jpg";
-import foto7 from "@/assets/foto-7.jpg";
-import foto8 from "@/assets/foto-8.jpg";
-import foto9 from "@/assets/foto-9.jpg";
-import foto10 from "@/assets/foto-10.jpg";
-import foto11 from "@/assets/foto-11.jpg";
-import foto12 from "@/assets/foto-12.jpg";
-import foto13 from "@/assets/foto-13.jpg";
-import foto14 from "@/assets/foto-14.jpg";
-import foto15 from "@/assets/foto-15.jpg";
-import foto16 from "@/assets/foto-16.jpg";
 import cocar from "@/assets/cocar.jpg";
 import colar from "@/assets/colar.jpg";
 import pulseira from "@/assets/pulseira.jpg";
@@ -343,8 +333,8 @@ const Index = () => {
             <p className="text-xl text-muted-foreground">Momentos do projeto registrados</p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-            {[foto1, foto2, foto3, foto4, foto5, foto6, foto7, foto8, foto9, foto10, foto11, foto12, foto13, foto14, foto15, foto16].map((img, index) => (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            {[foto1, foto2, foto3, foto4, foto5, foto6].map((img, index) => (
               <div
                 key={index}
                 className="aspect-square overflow-hidden rounded-lg shadow-md cursor-pointer hover-lift"
