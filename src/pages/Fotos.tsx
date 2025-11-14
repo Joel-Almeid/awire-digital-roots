@@ -21,6 +21,13 @@ import foto13 from "@/assets/foto-13.jpg";
 import foto14 from "@/assets/foto-14.jpg";
 import foto15 from "@/assets/foto-15.jpg";
 import foto16 from "@/assets/foto-16.jpg";
+import foto17 from "@/assets/foto-17.jpg";
+import foto18 from "@/assets/foto-18.jpg";
+import foto19 from "@/assets/foto-19.jpg";
+import foto20 from "@/assets/foto-20.jpg";
+import foto21 from "@/assets/foto-21.jpg";
+import foto22 from "@/assets/foto-22.jpg";
+import foto23 from "@/assets/foto-23.jpg";
 
 const Fotos = () => {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
@@ -44,6 +51,13 @@ const Fotos = () => {
     { type: "image" as const, src: foto14, alt: "Apresentação cultural na escola" },
     { type: "image" as const, src: foto15, alt: "Foto em grupo dos participantes do projeto" },
     { type: "image" as const, src: foto16, alt: "Trio recebendo materiais do projeto" },
+    { type: "image" as const, src: foto17, alt: "Laboratório de informática do projeto" },
+    { type: "image" as const, src: foto18, alt: "Aula no laboratório de informática" },
+    { type: "image" as const, src: foto19, alt: "Equipe e participantes do Projeto AWIRE DIGITAL" },
+    { type: "image" as const, src: foto20, alt: "Mesa de lanche da confraternização" },
+    { type: "image" as const, src: foto21, alt: "Cerimônia de certificação dos participantes" },
+    { type: "image" as const, src: foto22, alt: "Estudante trabalhando no computador" },
+    { type: "image" as const, src: foto23, alt: "Equipe do Projeto AWIRE DIGITAL" },
   ];
 
   return (
