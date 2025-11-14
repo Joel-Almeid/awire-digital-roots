@@ -36,7 +36,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={logoAwire} alt="AWIRE DIGITAL" className="h-12 w-auto transition-transform group-hover:scale-105" />
+            <img src={logoAwire} alt="AWIRE DIGITAL" className="h-24 w-auto transition-transform group-hover:scale-105" />
             <div className="hidden md:block">
               <div className="text-lg font-bold text-primary">AWIRE DIGITAL</div>
               <div className="text-xs text-muted-foreground">Inclusão Digital</div>
