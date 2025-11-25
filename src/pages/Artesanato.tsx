@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,8 @@ import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import { getArtesanatos, Artesanato as ArtesanatoType } from "@/lib/firestore";
 
-import cocar from "@/assets/cocar.jpg";
-import colar from "@/assets/colar.jpg";
-import pulseira from "@/assets/pulseira.jpg";
 import heroBackground from "@/assets/hero-background.jpg";
 
 const Artesanato = () => {
@@ -19,37 +17,23 @@ const Artesanato = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("todas");
   const [aldeiaFilter, setAldeiaFilter] = useState("todas");
+  const [crafts, setCrafts] = useState<ArtesanatoType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const crafts = [
-    {
-      id: 1,
-      name: "Cocar Tradicional Javaé",
-      image: cocar,
-      description: "Feito por Aranã Txuiri com penas naturais e materiais tradicionais",
-      category: "Adornos",
-      aldeia: "Txuiri",
-    },
-    {
-      id: 2,
-      name: "Colar de Miçangas",
-      image: colar,
-      description: "Colar artesanal com padrões geométricos tradicionais",
-      category: "Adornos",
-      aldeia: "Canoanã",
-    },
-    {
-      id: 3,
-      name: "Pulseira Tradicional",
-      image: pulseira,
-      description: "Pulseira de miçangas com padrões culturais autênticos",
-      category: "Adornos",
-      aldeia: "Canoanã",
-    },
-  ];
+  // Carregar artesanatos do Firestore
+  useEffect(() => {
+    const loadCrafts = async () => {
+      setLoading(true);
+      const data = await getArtesanatos();
+      setCrafts(data);
+      setLoading(false);
+    };
+    loadCrafts();
+  }, []);
 
   const filteredCrafts = crafts.filter((craft) => {
-    const matchesSearch = craft.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "todas" || craft.category === categoryFilter;
+    const matchesSearch = craft.nome.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === "todas" || craft.categoria === categoryFilter;
     const matchesAldeia = aldeiaFilter === "todas" || craft.aldeia === aldeiaFilter;
     return matchesSearch && matchesCategory && matchesAldeia;
   });
@@ -160,9 +144,18 @@ const Artesanato = () => {
             </div>
 
             {/* Results */}
-            {filteredCrafts.length === 0 ? (
+            {loading ? (
               <div className="text-center py-12">
-                <p className="text-xl text-muted-foreground">Nenhum artesanato encontrado com os filtros selecionados.</p>
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Carregando artesanatos...</p>
+              </div>
+            ) : filteredCrafts.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-xl text-muted-foreground">
+                  {crafts.length === 0 
+                    ? "Nenhum artesanato cadastrado ainda." 
+                    : "Nenhum artesanato encontrado com os filtros selecionados."}
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -174,16 +167,16 @@ const Artesanato = () => {
                   >
                     <div className="aspect-square overflow-hidden">
                       <img
-                        src={craft.image}
-                        alt={craft.name}
+                        src={craft.imageUrl}
+                        alt={craft.nome}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                       />
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-foreground mb-2">{craft.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{craft.description}</p>
+                      <h3 className="text-xl font-bold text-foreground mb-2">{craft.nome}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{craft.descricao}</p>
                       <div className="flex gap-2 mb-4">
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{craft.category}</span>
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{craft.categoria}</span>
                         <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">{craft.aldeia}</span>
                       </div>
                       <Button 

@@ -9,26 +9,31 @@ import { useAuth } from "@/contexts/AuthContext";
 import logoAwire from "@/assets/logo-awire.png";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !password) {
+    if (!email || !password) {
       toast.error("Por favor, preencha todos os campos.");
       return;
     }
 
-    const success = login(username, password);
+    setLoading(true);
     
-    if (success) {
+    const result = await login(email, password);
+    
+    setLoading(false);
+    
+    if (result.success) {
       toast.success("Login realizado com sucesso!");
-      navigate("/admin");
+      navigate("/admin/dashboard");
     } else {
-      toast.error("Credenciais inválidas. Tente novamente.");
+      toast.error(result.error || "Erro ao fazer login. Tente novamente.");
     }
   };
 
@@ -45,18 +50,19 @@ const Login = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="username" className="text-sm font-medium text-foreground">
-              Usuário
+            <label htmlFor="email" className="text-sm font-medium text-foreground">
+              Email
             </label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                id="username"
-                type="text"
-                placeholder="Digite seu usuário"
+                id="email"
+                type="email"
+                placeholder="Digite seu email"
                 className="pl-10 bg-background"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
             </div>
           </div>
@@ -74,6 +80,7 @@ const Login = () => {
                 className="pl-10 bg-background"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
               />
             </div>
           </div>
@@ -82,8 +89,9 @@ const Login = () => {
             type="submit"
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             size="lg"
+            disabled={loading}
           >
-            Entrar
+            {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
 
