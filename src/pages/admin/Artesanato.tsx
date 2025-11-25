@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Search, Package } from "lucide-react";
+import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,20 +9,83 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import cocar from "@/assets/cocar.jpg";
-import colar from "@/assets/colar.jpg";
-import pulseira from "@/assets/pulseira.jpg";
+import { getArtesanatos, addArtesanato, deleteArtesanato, Artesanato as ArtesanatoType } from "@/lib/firestore";
 
 const Artesanato = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [aldeiaFilter, setAldeiaFilter] = useState("all");
+  const [products, setProducts] = useState<ArtesanatoType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Formulário
+  const [formData, setFormData] = useState({
+    nome: "",
+    descricao: "",
+    artesaoNome: "",
+    categoria: "",
+    aldeia: ""
+  });
 
-  const products = [
-    { id: 1, name: "Cocar Tradicional", image: cocar, artisan: "Juma Karajá", category: "Adornos", aldeia: "Canoanã" },
-    { id: 2, name: "Colar de Sementes", image: colar, artisan: "Aranã Txuiri", category: "Adornos", aldeia: "Txuiri" },
-    { id: 3, name: "Pulseira Javaé", image: pulseira, artisan: "Ijanaru Javaé", category: "Adornos", aldeia: "Canoanã" },
-  ];
+  // Carregar artesanatos do Firestore
+  useEffect(() => {
+    loadArtesanatos();
+  }, []);
+
+  const loadArtesanatos = async () => {
+    setLoading(true);
+    const data = await getArtesanatos();
+    setProducts(data);
+    setLoading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.nome || !formData.descricao || !formData.artesaoNome || !formData.categoria || !formData.aldeia) {
+      toast.error("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    const result = await addArtesanato({
+      nome: formData.nome,
+      descricao: formData.descricao,
+      imageUrl: "https://via.placeholder.com/400x300", // Por enquanto placeholder - depois implementar upload
+      artesaoId: "temp", // Por enquanto temp - depois relacionar com artesão real
+      artesaoNome: formData.artesaoNome,
+      categoria: formData.categoria,
+      aldeia: formData.aldeia
+    });
+
+    if (result.success) {
+      toast.success("Artesanato adicionado com sucesso!");
+      setDialogOpen(false);
+      setFormData({ nome: "", descricao: "", artesaoNome: "", categoria: "", aldeia: "" });
+      loadArtesanatos();
+    } else {
+      toast.error("Erro ao adicionar artesanato. Tente novamente.");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este artesanato?")) return;
+    
+    const result = await deleteArtesanato(id);
+    if (result.success) {
+      toast.success("Artesanato excluído com sucesso!");
+      loadArtesanatos();
+    } else {
+      toast.error("Erro ao excluir artesanato.");
+    }
+  };
+
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === "all" || product.categoria.toLowerCase() === categoryFilter.toLowerCase();
+    const matchesAldeia = aldeiaFilter === "all" || product.aldeia.toLowerCase() === aldeiaFilter.toLowerCase();
+    return matchesSearch && matchesCategory && matchesAldeia;
+  });
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -35,7 +99,7 @@ const Artesanato = () => {
               <p className="text-muted-foreground">Adicione, edite ou remova produtos</p>
             </div>
             
-            <Dialog>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-gold hover:bg-gold/90 text-green-dark font-semibold">
                   <Plus className="w-4 h-4 mr-2" />
@@ -46,57 +110,70 @@ const Artesanato = () => {
                 <DialogHeader>
                   <DialogTitle className="text-foreground">Adicionar Novo Artesanato</DialogTitle>
                 </DialogHeader>
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="name">Nome do Produto</Label>
-                    <Input id="name" placeholder="Ex: Cocar Tradicional" className="bg-background" />
+                    <Label htmlFor="nome">Nome do Produto *</Label>
+                    <Input 
+                      id="nome" 
+                      placeholder="Ex: Cocar Tradicional" 
+                      className="bg-background"
+                      value={formData.nome}
+                      onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                      required
+                    />
                   </div>
                   <div>
-                    <Label htmlFor="description">Descrição</Label>
-                    <Textarea id="description" placeholder="Descreva o artesanato..." className="bg-background" rows={4} />
+                    <Label htmlFor="descricao">Descrição Detalhada *</Label>
+                    <Textarea 
+                      id="descricao" 
+                      placeholder="Descreva o artesanato, materiais, significado cultural..." 
+                      className="bg-background" 
+                      rows={4}
+                      value={formData.descricao}
+                      onChange={(e) => setFormData({...formData, descricao: e.target.value})}
+                      required
+                    />
                   </div>
                   <div>
                     <Label htmlFor="image">Imagem do Produto</Label>
                     <Input id="image" type="file" accept="image/*" className="bg-background" />
+                    <p className="text-xs text-muted-foreground mt-1">Upload será implementado em breve</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Artesão</Label>
-                      <Select>
-                        <SelectTrigger className="bg-background">
-                          <SelectValue placeholder="Selecionar Artesão" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="juma">Juma Karajá</SelectItem>
-                          <SelectItem value="arana">Aranã Txuiri</SelectItem>
-                          <SelectItem value="ijanaru">Ijanaru Javaé</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Label>Nome do Artesão *</Label>
+                      <Input 
+                        placeholder="Ex: Juma Karajá" 
+                        className="bg-background"
+                        value={formData.artesaoNome}
+                        onChange={(e) => setFormData({...formData, artesaoNome: e.target.value})}
+                        required
+                      />
                     </div>
                     <div>
-                      <Label>Categoria</Label>
-                      <Select>
+                      <Label>Categoria *</Label>
+                      <Select value={formData.categoria} onValueChange={(value) => setFormData({...formData, categoria: value})}>
                         <SelectTrigger className="bg-background">
                           <SelectValue placeholder="Selecionar Categoria" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="adornos">Adornos</SelectItem>
-                          <SelectItem value="utilitarios">Utilitários</SelectItem>
-                          <SelectItem value="decoracao">Decoração</SelectItem>
+                          <SelectItem value="Adornos">Adornos</SelectItem>
+                          <SelectItem value="Utilitários">Utilitários</SelectItem>
+                          <SelectItem value="Decoração">Decoração</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                   <div>
-                    <Label>Aldeia/Origem</Label>
-                    <Select>
+                    <Label>Aldeia/Origem *</Label>
+                    <Select value={formData.aldeia} onValueChange={(value) => setFormData({...formData, aldeia: value})}>
                       <SelectTrigger className="bg-background">
                         <SelectValue placeholder="Selecionar Aldeia" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="canoana">Canoanã</SelectItem>
-                        <SelectItem value="txuiri">Txuiri</SelectItem>
-                        <SelectItem value="pimentel">Pimentel Barbosa</SelectItem>
+                        <SelectItem value="Canoanã">Canoanã</SelectItem>
+                        <SelectItem value="Txuiri">Txuiri</SelectItem>
+                        <SelectItem value="Pimentel Barbosa">Pimentel Barbosa</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -144,30 +221,51 @@ const Artesanato = () => {
             </div>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product) => (
-              <Card key={product.id} className="bg-card border-border/10 overflow-hidden hover:border-gold/30 transition-all">
-                <img src={product.image} alt={product.name} className="w-full h-48 object-cover" />
-                <div className="p-4">
-                  <h3 className="font-semibold text-foreground mb-1">{product.name}</h3>
-                  <p className="text-sm text-muted-foreground mb-1">Por: {product.artisan}</p>
-                  <div className="flex gap-2 text-xs text-muted-foreground mb-4">
-                    <span className="bg-green-medium/20 px-2 py-1 rounded">{product.category}</span>
-                    <span className="bg-green-medium/20 px-2 py-1 rounded">{product.aldeia}</span>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Carregando artesanatos...</p>
+            </div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                {products.length === 0 
+                  ? "Nenhum artesanato cadastrado ainda. Adicione o primeiro!" 
+                  : "Nenhum artesanato encontrado com os filtros selecionados."}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProducts.map((product) => (
+                <Card key={product.id} className="bg-card border-border/10 overflow-hidden hover:border-gold/30 transition-all">
+                  <img src={product.imageUrl} alt={product.nome} className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <h3 className="font-semibold text-foreground mb-1">{product.nome}</h3>
+                    <p className="text-sm text-muted-foreground mb-1">Por: {product.artesaoNome}</p>
+                    <div className="flex gap-2 text-xs text-muted-foreground mb-4">
+                      <span className="bg-green-medium/20 px-2 py-1 rounded">{product.categoria}</span>
+                      <span className="bg-green-medium/20 px-2 py-1 rounded">{product.aldeia}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1 border-border/20 hover:bg-green-medium/20">
+                        <Edit className="w-3 h-3 mr-1" />
+                        Editar
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                        onClick={() => product.id && handleDelete(product.id)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="flex-1 border-border/20 hover:bg-green-medium/20">
-                      <Edit className="w-3 h-3 mr-1" />
-                      Editar
-                    </Button>
-                    <Button variant="outline" size="sm" className="border-destructive/50 text-destructive hover:bg-destructive/10">
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>
