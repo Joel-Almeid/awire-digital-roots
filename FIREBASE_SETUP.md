@@ -77,11 +77,43 @@ service cloud.firestore {
 }
 ```
 
-### 5️⃣ Configurar Storage (Para Upload de Imagens - Futuro)
+### 5️⃣ Configurar Storage (Para Upload de Imagens) ⚠️ **OBRIGATÓRIO**
 
 1. No Console do Firebase, vá em **Storage**
 2. Clique em **Começar**
-3. Aceite as regras padrão por enquanto
+3. Escolha **Iniciar no modo de produção**
+4. Selecione a mesma localização do Firestore
+
+**Configure as Regras de Segurança do Storage:**
+
+No Storage, vá em **Regras** e adicione:
+
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Regras para imagens de artesanatos
+    match /artesanatos/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Regras para fotos de artesãos
+    match /artesaos/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Regras para fotos da galeria
+    match /fotos/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}
+```
+
+⚠️ **IMPORTANTE**: Sem configurar o Storage, o upload de imagens não funcionará!
 
 ### 6️⃣ Testar a Aplicação
 
@@ -166,9 +198,11 @@ service cloud.firestore {
 - Verifique as regras de segurança do Firestore
 - Certifique-se de que o usuário está autenticado
 
-### Imagens não aparecem
-- Por enquanto, estamos usando placeholders
-- O upload real de imagens será implementado em breve
+### Imagens não aparecem ou upload trava em "Fazendo upload..."
+- **Verifique se o Storage foi ativado** no Firebase Console
+- **Configure as regras de segurança do Storage** (passo 5 acima)
+- Certifique-se de que o usuário está autenticado
+- Verifique no Console do Firebase se o bucket existe em Storage
 
 ## 📞 Suporte
 

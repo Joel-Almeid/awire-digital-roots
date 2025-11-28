@@ -64,7 +64,8 @@ const Artesanato = () => {
       const uploadResult = await uploadImage(selectedImage, imagePath);
 
       if (!uploadResult.success) {
-        toast.error("Erro ao fazer upload da imagem.");
+        toast.error("Erro ao fazer upload da imagem. Verifique se o Firebase Storage está configurado corretamente.");
+        console.error("Detalhes do erro:", uploadResult.error);
         setUploading(false);
         return;
       }
