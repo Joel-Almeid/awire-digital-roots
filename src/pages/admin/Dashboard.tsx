@@ -30,7 +30,7 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-foreground mb-2">
-              Bem-vindo(a), {user?.name}!
+              Bem-vindo(a), {user?.displayName || user?.email || "Administrador"}!
             </h1>
             <p className="text-muted-foreground">
               Gerencie o conteúdo do site AWIRE DIGITAL
