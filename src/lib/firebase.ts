@@ -16,18 +16,18 @@ const requiredEnvVars = [
 const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
 
 if (missingVars.length > 0) {
-  console.error('❌ Variáveis de ambiente do Firebase faltando:', missingVars);
-  console.error('Por favor, configure o arquivo .env com as chaves do Firebase.');
+  console.warn('⚠️ Variáveis de ambiente do Firebase não configuradas:', missingVars);
+  console.warn('A aplicação funcionará em modo demo. Configure o arquivo .env para usar Firebase real.');
 }
 
-// Configuração do Firebase usando variáveis de ambiente
+// Configuração do Firebase usando variáveis de ambiente (com fallbacks para evitar erros)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'demo-api-key',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'demo.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'demo-project',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'demo.appspot.com',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '000000000000',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:000000000000:web:0000000000000000'
 };
 
 // Inicializar Firebase
