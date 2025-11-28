@@ -10,7 +10,8 @@ import {
   orderBy,
   Timestamp 
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { db, storage } from "./firebase";
 
 // Tipos
 export interface Artesanato {
@@ -40,6 +41,31 @@ export interface Foto {
   legenda: string;
   createdAt: Timestamp;
 }
+
+// ===== STORAGE =====
+
+export const uploadImage = async (file: File, path: string) => {
+  try {
+    const storageRef = ref(storage, path);
+    const snapshot = await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return { success: true, url: downloadURL };
+  } catch (error) {
+    console.error("Erro ao fazer upload da imagem:", error);
+    return { success: false, error };
+  }
+};
+
+export const deleteImage = async (imageUrl: string) => {
+  try {
+    const imageRef = ref(storage, imageUrl);
+    await deleteObject(imageRef);
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao excluir imagem:", error);
+    return { success: false, error };
+  }
+};
 
 // ===== ARTESANATO =====
 
