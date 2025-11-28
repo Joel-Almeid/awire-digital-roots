@@ -34,8 +34,9 @@ const Navigation = () => {
     >
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo - Versão Escolhida: h-16 (Maior) */}
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
+            {/* Mantive o tamanho h-16 que você queria */}
             <img src={logoAwire} alt="AWIRE DIGITAL" className="h-16 w-auto transition-transform group-hover:scale-105" />
             <div className="hidden md:block">
               <div className="text-lg font-bold text-primary">AWIRE DIGITAL</div>
@@ -100,7 +101,7 @@ const Navigation = () => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.title}
-                </a>
+                </Link>
               )
             ))}
           </div>
