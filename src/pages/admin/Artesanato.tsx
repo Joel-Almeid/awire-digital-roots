@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { getArtesanatos, addArtesanato, deleteArtesanato, Artesanato as ArtesanatoType } from "@/lib/firestore";
+import { getArtesanatos, addArtesanato, deleteArtesanato, uploadImage, Artesanato as ArtesanatoType } from "@/lib/firestore";
 
 const Artesanato = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,6 +18,8 @@ const Artesanato = () => {
   const [products, setProducts] = useState<ArtesanatoType[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
   
   // Formulário
   const [formData, setFormData] = useState({
@@ -48,23 +50,50 @@ const Artesanato = () => {
       return;
     }
 
-    const result = await addArtesanato({
-      nome: formData.nome,
-      descricao: formData.descricao,
-      imageUrl: "https://via.placeholder.com/400x300", // Por enquanto placeholder - depois implementar upload
-      artesaoId: "temp", // Por enquanto temp - depois relacionar com artesão real
-      artesaoNome: formData.artesaoNome,
-      categoria: formData.categoria,
-      aldeia: formData.aldeia
-    });
+    if (!selectedImage) {
+      toast.error("Por favor, selecione uma imagem para o artesanato.");
+      return;
+    }
 
-    if (result.success) {
-      toast.success("Artesanato adicionado com sucesso!");
-      setDialogOpen(false);
-      setFormData({ nome: "", descricao: "", artesaoNome: "", categoria: "", aldeia: "" });
-      loadArtesanatos();
-    } else {
-      toast.error("Erro ao adicionar artesanato. Tente novamente.");
+    setUploading(true);
+
+    try {
+      // Upload da imagem
+      const timestamp = Date.now();
+      const imagePath = `artesanatos/${timestamp}_${selectedImage.name}`;
+      const uploadResult = await uploadImage(selectedImage, imagePath);
+
+      if (!uploadResult.success) {
+        toast.error("Erro ao fazer upload da imagem.");
+        setUploading(false);
+        return;
+      }
+
+      // Adicionar artesanato com URL da imagem
+      const result = await addArtesanato({
+        nome: formData.nome,
+        descricao: formData.descricao,
+        imageUrl: uploadResult.url!,
+        artesaoId: "temp",
+        artesaoNome: formData.artesaoNome,
+        categoria: formData.categoria,
+        aldeia: formData.aldeia
+      });
+
+      if (result.success) {
+        toast.success("Artesanato adicionado com sucesso!");
+        setDialogOpen(false);
+        setFormData({ nome: "", descricao: "", artesaoNome: "", categoria: "", aldeia: "" });
+        setSelectedImage(null);
+        loadArtesanatos();
+      } else {
+        toast.error("Erro ao adicionar artesanato. Tente novamente.");
+      }
+    } catch (error) {
+      console.error("Erro:", error);
+      toast.error("Erro ao salvar artesanato.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -135,9 +164,18 @@ const Artesanato = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="image">Imagem do Produto</Label>
-                    <Input id="image" type="file" accept="image/*" className="bg-background" />
-                    <p className="text-xs text-muted-foreground mt-1">Upload será implementado em breve</p>
+                    <Label htmlFor="image">Imagem do Produto *</Label>
+                    <Input 
+                      id="image" 
+                      type="file" 
+                      accept="image/*" 
+                      className="bg-background" 
+                      onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                      required
+                    />
+                    {selectedImage && (
+                      <p className="text-xs text-green-400 mt-1">✓ {selectedImage.name}</p>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -177,8 +215,12 @@ const Artesanato = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button type="submit" className="w-full bg-gold hover:bg-gold/90 text-green-dark font-semibold">
-                    Salvar Artesanato
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gold hover:bg-gold/90 text-green-dark font-semibold"
+                    disabled={uploading}
+                  >
+                    {uploading ? "Fazendo upload..." : "Salvar Artesanato"}
                   </Button>
                 </form>
               </DialogContent>
