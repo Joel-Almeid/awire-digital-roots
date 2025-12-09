@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { getArtesanatos, Artesanato as ArtesanatoType } from "@/lib/firestore";
+import { getArtesanatos, getCategorias, getAldeias, getConfiguracoes, Artesanato as ArtesanatoType, Categoria, Aldeia } from "@/lib/firestore";
 
 import heroBackground from "@/assets/hero-background.jpg";
 
@@ -18,17 +18,30 @@ const Artesanato = () => {
   const [categoryFilter, setCategoryFilter] = useState("todas");
   const [aldeiaFilter, setAldeiaFilter] = useState("todas");
   const [crafts, setCrafts] = useState<ArtesanatoType[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [aldeias, setAldeias] = useState<Aldeia[]>([]);
+  const [textoComoFunciona, setTextoComoFunciona] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Carregar artesanatos do Firestore
+  // Carregar dados do Firestore
   useEffect(() => {
-    const loadCrafts = async () => {
+    const loadData = async () => {
       setLoading(true);
-      const data = await getArtesanatos();
-      setCrafts(data);
+      const [craftsData, categoriasData, aldeiasData, configData] = await Promise.all([
+        getArtesanatos(),
+        getCategorias(),
+        getAldeias(),
+        getConfiguracoes()
+      ]);
+      setCrafts(craftsData);
+      setCategorias(categoriasData);
+      setAldeias(aldeiasData);
+      if (configData?.textoComoFunciona) {
+        setTextoComoFunciona(configData.textoComoFunciona);
+      }
       setLoading(false);
     };
-    loadCrafts();
+    loadData();
   }, []);
 
   const filteredCrafts = crafts.filter((craft) => {
@@ -124,9 +137,9 @@ const Artesanato = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
-                  <SelectItem value="Adornos">Adornos</SelectItem>
-                  <SelectItem value="Utilitários">Utilitários</SelectItem>
-                  <SelectItem value="Decoração">Decoração</SelectItem>
+                  {categorias.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.nome}>{cat.nome}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -136,9 +149,9 @@ const Artesanato = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todas">Todas</SelectItem>
-                  <SelectItem value="Canoanã">Canoanã</SelectItem>
-                  <SelectItem value="Txuiri">Txuiri</SelectItem>
-                  <SelectItem value="Pimentel Barbosa">Pimentel Barbosa</SelectItem>
+                  {aldeias.map((ald) => (
+                    <SelectItem key={ald.id} value={ald.nome}>{ald.nome}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
