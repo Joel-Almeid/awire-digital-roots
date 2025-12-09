@@ -5,6 +5,8 @@ import {
   doc, 
   updateDoc, 
   deleteDoc,
+  getDoc,
+  setDoc,
   query,
   where,
   orderBy,
@@ -183,6 +185,149 @@ export const deleteFoto = async (id: string) => {
     return { success: true };
   } catch (error) {
     console.error("Erro ao excluir foto:", error);
+    return { success: false, error };
+  }
+};
+
+// ===== CONFIGURAÇÕES =====
+
+export interface Configuracoes {
+  textoComoFunciona: string;
+  textoSobreProjeto: string;
+}
+
+export const getConfiguracoes = async (): Promise<Configuracoes | null> => {
+  try {
+    const docRef = doc(db, "configuracoes", "geral");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return docSnap.data() as Configuracoes;
+    }
+    return null;
+  } catch (error) {
+    console.error("Erro ao buscar configurações:", error);
+    return null;
+  }
+};
+
+export const saveConfiguracoes = async (config: Configuracoes) => {
+  try {
+    await setDoc(doc(db, "configuracoes", "geral"), config);
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao salvar configurações:", error);
+    return { success: false, error };
+  }
+};
+
+// ===== CATEGORIAS =====
+
+export interface Categoria {
+  id?: string;
+  nome: string;
+  createdAt: Timestamp;
+}
+
+export const getCategorias = async (): Promise<Categoria[]> => {
+  try {
+    const querySnapshot = await getDocs(
+      query(collection(db, "categorias"), orderBy("createdAt", "asc"))
+    );
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Categoria[];
+  } catch (error) {
+    console.error("Erro ao buscar categorias:", error);
+    return [];
+  }
+};
+
+export const addCategoria = async (nome: string) => {
+  try {
+    const docRef = await addDoc(collection(db, "categorias"), {
+      nome,
+      createdAt: Timestamp.now()
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Erro ao adicionar categoria:", error);
+    return { success: false, error };
+  }
+};
+
+export const updateCategoria = async (id: string, nome: string) => {
+  try {
+    await updateDoc(doc(db, "categorias", id), { nome });
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao atualizar categoria:", error);
+    return { success: false, error };
+  }
+};
+
+export const deleteCategoria = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "categorias", id));
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao excluir categoria:", error);
+    return { success: false, error };
+  }
+};
+
+// ===== ALDEIAS =====
+
+export interface Aldeia {
+  id?: string;
+  nome: string;
+  createdAt: Timestamp;
+}
+
+export const getAldeias = async (): Promise<Aldeia[]> => {
+  try {
+    const querySnapshot = await getDocs(
+      query(collection(db, "aldeias"), orderBy("createdAt", "asc"))
+    );
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Aldeia[];
+  } catch (error) {
+    console.error("Erro ao buscar aldeias:", error);
+    return [];
+  }
+};
+
+export const addAldeia = async (nome: string) => {
+  try {
+    const docRef = await addDoc(collection(db, "aldeias"), {
+      nome,
+      createdAt: Timestamp.now()
+    });
+    return { success: true, id: docRef.id };
+  } catch (error) {
+    console.error("Erro ao adicionar aldeia:", error);
+    return { success: false, error };
+  }
+};
+
+export const updateAldeia = async (id: string, nome: string) => {
+  try {
+    await updateDoc(doc(db, "aldeias", id), { nome });
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao atualizar aldeia:", error);
+    return { success: false, error };
+  }
+};
+
+export const deleteAldeia = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "aldeias", id));
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao excluir aldeia:", error);
     return { success: false, error };
   }
 };
