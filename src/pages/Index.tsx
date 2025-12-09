@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, MapPin, Users, Palette, Camera, Mail, Phone, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Lightbox from "@/components/Lightbox";
+import { getConfiguracoes } from "@/lib/firestore";
 
 import heroBackground from "@/assets/hero-background.jpg";
 import sectionBg1 from "@/assets/section-background-1.jpg";
@@ -24,6 +25,17 @@ import pulseira from "@/assets/pulseira.jpg";
 
 const Index = () => {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [textoSobreProjeto, setTextoSobreProjeto] = useState<string>("");
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      const config = await getConfiguracoes();
+      if (config?.textoSobreProjeto) {
+        setTextoSobreProjeto(config.textoSobreProjeto);
+      }
+    };
+    loadConfig();
+  }, []);
 
   const participants = [
     {
@@ -168,7 +180,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">O que é</h3>
               <p className="text-muted-foreground">
-                Um projeto de extensão do Instituto Federal do Tocantins (IFTO) que promove a inclusão digital nas comunidades indígenas da Ilha do Bananal, valorizando a cultura local e fortalecendo a identidade indígena.
+                {textoSobreProjeto || "Um projeto de extensão do Instituto Federal do Tocantins (IFTO) que promove a inclusão digital nas comunidades indígenas da Ilha do Bananal, valorizando a cultura local e fortalecendo a identidade indígena."}
               </p>
             </Card>
 
