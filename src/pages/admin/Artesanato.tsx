@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { getArtesanatos, addArtesanato, deleteArtesanato, uploadImage, getCategorias, getAldeias, Artesanato as ArtesanatoType, Categoria, Aldeia } from "@/lib/firestore";
+import { getArtesanatos, addArtesanato, deleteArtesanato, uploadImageCloudinary, getCategorias, getAldeias, Artesanato as ArtesanatoType, Categoria, Aldeia } from "@/lib/firestore";
 
 const Artesanato = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,13 +71,11 @@ const Artesanato = () => {
     setUploading(true);
 
     try {
-      // Upload da imagem
-      const timestamp = Date.now();
-      const imagePath = `artesanatos/${timestamp}_${selectedImage.name}`;
-      const uploadResult = await uploadImage(selectedImage, imagePath);
+      // Upload da imagem para Cloudinary
+      const uploadResult = await uploadImageCloudinary(selectedImage);
 
       if (!uploadResult.success) {
-        toast.error("Erro ao fazer upload da imagem. Verifique se o Firebase Storage está configurado corretamente.");
+        toast.error("Erro ao fazer upload da imagem no Cloudinary. Verifique as configurações.");
         console.error("Detalhes do erro:", uploadResult.error);
         setUploading(false);
         return;
