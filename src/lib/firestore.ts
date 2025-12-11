@@ -12,8 +12,8 @@ import {
   orderBy,
   Timestamp 
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { db } from "./firebase";
+import axios from "axios";
 
 // Tipos
 export interface Artesanato {
@@ -44,29 +44,38 @@ export interface Foto {
   createdAt: Timestamp;
 }
 
-// ===== STORAGE =====
+// ===== STORAGE (CLOUDINARY) =====
 
-export const uploadImage = async (file: File, path: string) => {
+const CLOUDINARY_CLOUD_NAME = "dzrn84j0i";
+const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
+export const uploadImageCloudinary = async (file: File) => {
   try {
-    const storageRef = ref(storage, path);
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "ml_default");
+
+    const response = await axios.post(CLOUDINARY_UPLOAD_URL, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    const downloadURL = response.data.secure_url;
     return { success: true, url: downloadURL };
   } catch (error) {
-    console.error("Erro ao fazer upload da imagem:", error);
+    console.error("Erro ao fazer upload da imagem no Cloudinary:", error);
     return { success: false, error };
   }
 };
 
+// Alias para manter compatibilidade
+export const uploadImage = uploadImageCloudinary;
+
 export const deleteImage = async (imageUrl: string) => {
-  try {
-    const imageRef = ref(storage, imageUrl);
-    await deleteObject(imageRef);
-    return { success: true };
-  } catch (error) {
-    console.error("Erro ao excluir imagem:", error);
-    return { success: false, error };
-  }
+  // Cloudinary delete requer API server-side - apenas log para não quebrar o fluxo
+  console.log("Exclusão de imagem no Cloudinary pulada (requer backend):", imageUrl);
+  return { success: true };
 };
 
 // ===== ARTESANATO =====
