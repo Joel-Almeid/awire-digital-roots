@@ -90,7 +90,7 @@ const Index = () => {
       name: "Caio Gobbo",
       role: "Voluntário",
       institution: "IFTO",
-      description: "Suporte técnico e logística.",
+      description: "Oferece suporte técnico contínuo e gerencia a logística operacional, facilitando a execução de eventos e ações de campo do projeto.",
     },
   ];
 
