@@ -48,7 +48,7 @@ const Index = () => {
       name: "Joel de Almeida",
       role: "Bolsista",
       institution: "IFTO",
-      description: "Estudante do curso de Informática, atua como professor no curso e trabalha com a produção dos materiais didáticos, trabalhando no desenvolvimento do site.",
+      description: "Estudante de Informática do IFTO e bolsista, com foco na produção de materiais didáticos. Responsável pelo desenvolvimento, codificação e gestão técnica do site.",
     },
     {
       name: "Fernanda de Jesus",
@@ -81,16 +81,16 @@ const Index = () => {
       description: "Estudante. Auxilia na mediação cultural e na aplicação das atividades de inclusão digital.",
     },
     {
+      name: "Vitor Mendes Vilas Boas ",
+      role: "Voluntário",
+      institution: "IFTO",
+      description: "Apoio em eventos e comunicação visual, com ênfase na orientação pedagógica do Site do projeto, assegurando a coerência educacional e a qualidade das informações apresentadas no desenvolvimento do site.",
+    },
+    {
       name: "Caio Gobbo",
       role: "Voluntário",
       institution: "IFTO",
       description: "Suporte técnico e logística.",
-    },
-    {
-      name: "Vitor Vilas Boas",
-      role: "Voluntário",
-      institution: "IFTO",
-      description: "Apoio em eventos e comunicação visual e orientador no desenvolvimento pedagógico do site.",
     },
   ];
 
