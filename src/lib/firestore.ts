@@ -20,7 +20,7 @@ export interface Artesanato {
   id?: string;
   nome: string;
   descricao: string;
-  imageUrl: string;
+  imageUrls: string[]; // Array de até 3 URLs de imagens
   artesaoId: string;
   artesaoNome: string;
   categoria: string;
@@ -34,6 +34,7 @@ export interface Artesao {
   fotoUrl: string;
   whatsapp: string;
   aldeia: string;
+  ativo: boolean;
   createdAt: Timestamp;
 }
 
@@ -108,6 +109,20 @@ export const getArtesanatos = async () => {
   }
 };
 
+export const getArtesanatoById = async (id: string): Promise<Artesanato | null> => {
+  try {
+    const docRef = doc(db, "artesanatos", id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Artesanato;
+    }
+    return null;
+  } catch (error) {
+    console.error("Erro ao buscar artesanato por ID:", error);
+    return null;
+  }
+};
+
 export const updateArtesanato = async (id: string, data: Partial<Artesanato>) => {
   try {
     await updateDoc(doc(db, "artesanatos", id), data);
@@ -155,6 +170,40 @@ export const getArtesaos = async () => {
   } catch (error) {
     console.error("Erro ao buscar artesãos:", error);
     return [];
+  }
+};
+
+export const getArtesaoById = async (id: string): Promise<Artesao | null> => {
+  try {
+    const docRef = doc(db, "artesaos", id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as Artesao;
+    }
+    return null;
+  } catch (error) {
+    console.error("Erro ao buscar artesão por ID:", error);
+    return null;
+  }
+};
+
+export const updateArtesao = async (id: string, data: Partial<Artesao>) => {
+  try {
+    await updateDoc(doc(db, "artesaos", id), data);
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao atualizar artesão:", error);
+    return { success: false, error };
+  }
+};
+
+export const deleteArtesao = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "artesaos", id));
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao excluir artesão:", error);
+    return { success: false, error };
   }
 };
 
