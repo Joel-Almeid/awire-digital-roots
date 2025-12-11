@@ -180,7 +180,7 @@ const Artesanato = () => {
                   >
                     <div className="aspect-square overflow-hidden">
                       <img
-                        src={craft.imageUrl}
+                        src={craft.imageUrls?.[0] || "/placeholder.svg"}
                         alt={craft.nome}
                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                       />

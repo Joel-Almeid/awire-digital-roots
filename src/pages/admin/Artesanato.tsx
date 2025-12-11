@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Search, Package } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Package, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,20 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { getArtesanatos, addArtesanato, deleteArtesanato, uploadImageCloudinary, getCategorias, getAldeias, Artesanato as ArtesanatoType, Categoria, Aldeia } from "@/lib/firestore";
+import { 
+  getArtesanatos, 
+  addArtesanato, 
+  updateArtesanato,
+  deleteArtesanato, 
+  uploadImageCloudinary, 
+  getCategorias, 
+  getAldeias,
+  getArtesaos,
+  Artesanato as ArtesanatoType, 
+  Categoria, 
+  Aldeia,
+  Artesao 
+} from "@/lib/firestore";
 
 const Artesanato = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -18,15 +31,21 @@ const Artesanato = () => {
   const [products, setProducts] = useState<ArtesanatoType[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [aldeias, setAldeias] = useState<Aldeia[]>([]);
+  const [artesaos, setArtesaos] = useState<Artesao[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ArtesanatoType | null>(null);
+  
+  // Imagens (até 3)
+  const [selectedImages, setSelectedImages] = useState<(File | null)[]>([null, null, null]);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>(["", "", ""]);
   
   // Formulário
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
+    artesaoId: "",
     artesaoNome: "",
     categoria: "",
     aldeia: ""
@@ -39,14 +58,16 @@ const Artesanato = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const [artesanatosData, categoriasData, aldeiasData] = await Promise.all([
+    const [artesanatosData, categoriasData, aldeiasData, artesaosData] = await Promise.all([
       getArtesanatos(),
       getCategorias(),
-      getAldeias()
+      getAldeias(),
+      getArtesaos()
     ]);
     setProducts(artesanatosData);
     setCategorias(categoriasData);
     setAldeias(aldeiasData);
+    setArtesaos(artesaosData);
     setLoading(false);
   };
 
@@ -55,52 +76,125 @@ const Artesanato = () => {
     setProducts(data);
   };
 
+  const resetForm = () => {
+    setFormData({ nome: "", descricao: "", artesaoId: "", artesaoNome: "", categoria: "", aldeia: "" });
+    setSelectedImages([null, null, null]);
+    setExistingImageUrls(["", "", ""]);
+    setEditingProduct(null);
+  };
+
+  const openEditDialog = (product: ArtesanatoType) => {
+    setEditingProduct(product);
+    setFormData({
+      nome: product.nome,
+      descricao: product.descricao,
+      artesaoId: product.artesaoId,
+      artesaoNome: product.artesaoNome,
+      categoria: product.categoria,
+      aldeia: product.aldeia
+    });
+    // Preencher URLs existentes
+    const urls = product.imageUrls || [];
+    setExistingImageUrls([urls[0] || "", urls[1] || "", urls[2] || ""]);
+    setSelectedImages([null, null, null]);
+    setDialogOpen(true);
+  };
+
+  const handleImageChange = (index: number, file: File | null) => {
+    const newImages = [...selectedImages];
+    newImages[index] = file;
+    setSelectedImages(newImages);
+  };
+
+  const handleArtesaoChange = (artesaoId: string) => {
+    const artesao = artesaos.find(a => a.id === artesaoId);
+    if (artesao) {
+      setFormData({
+        ...formData,
+        artesaoId: artesao.id!,
+        artesaoNome: artesao.nome
+      });
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.nome || !formData.descricao || !formData.artesaoNome || !formData.categoria || !formData.aldeia) {
+    if (!formData.nome || !formData.descricao || !formData.artesaoId || !formData.categoria || !formData.aldeia) {
       toast.error("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
-    if (!selectedImage) {
-      toast.error("Por favor, selecione uma imagem para o artesanato.");
+    // Verificar se tem pelo menos uma imagem
+    const hasNewImage = selectedImages.some(img => img !== null);
+    const hasExistingImage = existingImageUrls.some(url => url !== "");
+    
+    if (!hasNewImage && !hasExistingImage) {
+      toast.error("Por favor, selecione pelo menos uma imagem para o artesanato.");
       return;
     }
 
     setUploading(true);
 
     try {
-      // Upload da imagem para Cloudinary
-      const uploadResult = await uploadImageCloudinary(selectedImage);
+      // Upload das novas imagens para Cloudinary
+      const finalUrls: string[] = [];
+      
+      for (let i = 0; i < 3; i++) {
+        if (selectedImages[i]) {
+          // Nova imagem selecionada - fazer upload
+          const uploadResult = await uploadImageCloudinary(selectedImages[i]!);
+          if (uploadResult.success) {
+            finalUrls.push(uploadResult.url!);
+          } else {
+            toast.error(`Erro ao fazer upload da imagem ${i + 1}.`);
+            setUploading(false);
+            return;
+          }
+        } else if (existingImageUrls[i]) {
+          // Manter URL existente
+          finalUrls.push(existingImageUrls[i]);
+        }
+      }
 
-      if (!uploadResult.success) {
-        toast.error("Erro ao fazer upload da imagem no Cloudinary. Verifique as configurações.");
-        console.error("Detalhes do erro:", uploadResult.error);
+      // Garantir que temos pelo menos 1 URL
+      if (finalUrls.length === 0) {
+        toast.error("Erro: nenhuma imagem válida.");
         setUploading(false);
         return;
       }
 
-      // Adicionar artesanato com URL da imagem
-      const result = await addArtesanato({
+      const artesanatoData = {
         nome: formData.nome,
         descricao: formData.descricao,
-        imageUrl: uploadResult.url!,
-        artesaoId: "temp",
+        imageUrls: finalUrls,
+        artesaoId: formData.artesaoId,
         artesaoNome: formData.artesaoNome,
         categoria: formData.categoria,
         aldeia: formData.aldeia
-      });
+      };
 
-      if (result.success) {
-        toast.success("Artesanato adicionado com sucesso!");
-        setDialogOpen(false);
-        setFormData({ nome: "", descricao: "", artesaoNome: "", categoria: "", aldeia: "" });
-        setSelectedImage(null);
-        loadArtesanatos();
+      if (editingProduct) {
+        // Atualizar artesanato existente
+        const result = await updateArtesanato(editingProduct.id!, artesanatoData);
+        if (result.success) {
+          toast.success("Artesanato atualizado com sucesso!");
+        } else {
+          toast.error("Erro ao atualizar artesanato.");
+        }
       } else {
-        toast.error("Erro ao adicionar artesanato. Tente novamente.");
+        // Adicionar novo artesanato
+        const result = await addArtesanato(artesanatoData);
+        if (result.success) {
+          toast.success("Artesanato adicionado com sucesso!");
+        } else {
+          toast.error("Erro ao adicionar artesanato.");
+        }
       }
+
+      setDialogOpen(false);
+      resetForm();
+      loadArtesanatos();
     } catch (error) {
       console.error("Erro:", error);
       toast.error("Erro ao salvar artesanato.");
@@ -140,16 +234,21 @@ const Artesanato = () => {
               <p className="text-muted-foreground">Adicione, edite ou remova produtos</p>
             </div>
             
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <Dialog open={dialogOpen} onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) resetForm();
+            }}>
               <DialogTrigger asChild>
                 <Button className="bg-gold hover:bg-gold/90 text-green-dark font-semibold">
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Novo Artesanato
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl bg-card">
+              <DialogContent className="max-w-2xl bg-card max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="text-foreground">Adicionar Novo Artesanato</DialogTitle>
+                  <DialogTitle className="text-foreground">
+                    {editingProduct ? "Editar Artesanato" : "Adicionar Novo Artesanato"}
+                  </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
@@ -175,30 +274,74 @@ const Artesanato = () => {
                       required
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="image">Imagem do Produto *</Label>
-                    <Input 
-                      id="image" 
-                      type="file" 
-                      accept="image/*" 
-                      className="bg-background" 
-                      onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
-                      required
-                    />
-                    {selectedImage && (
-                      <p className="text-xs text-green-400 mt-1">✓ {selectedImage.name}</p>
-                    )}
+                  
+                  {/* Upload de 3 Imagens */}
+                  <div className="space-y-3">
+                    <Label>Imagens do Produto (até 3) *</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      {[0, 1, 2].map((index) => (
+                        <div key={index} className="space-y-2">
+                          <Label className="text-sm text-muted-foreground">Imagem {index + 1}</Label>
+                          {existingImageUrls[index] && !selectedImages[index] ? (
+                            <div className="relative">
+                              <img 
+                                src={existingImageUrls[index]} 
+                                alt={`Imagem ${index + 1}`} 
+                                className="w-full h-24 object-cover rounded"
+                              />
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                className="absolute top-1 right-1 h-6 w-6 p-0"
+                                onClick={() => {
+                                  const newUrls = [...existingImageUrls];
+                                  newUrls[index] = "";
+                                  setExistingImageUrls(newUrls);
+                                }}
+                              >
+                                <X className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Input 
+                              type="file" 
+                              accept="image/*" 
+                              className="bg-background text-xs"
+                              onChange={(e) => handleImageChange(index, e.target.files?.[0] || null)}
+                            />
+                          )}
+                          {selectedImages[index] && (
+                            <p className="text-xs text-green-400 truncate">✓ {selectedImages[index]!.name}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Nome do Artesão *</Label>
-                      <Input 
-                        placeholder="Ex: Juma Karajá" 
-                        className="bg-background"
-                        value={formData.artesaoNome}
-                        onChange={(e) => setFormData({...formData, artesaoNome: e.target.value})}
-                        required
-                      />
+                      <Label>Artesão *</Label>
+                      <Select 
+                        value={formData.artesaoId} 
+                        onValueChange={handleArtesaoChange}
+                      >
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Selecionar Artesão" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {artesaos.filter(a => a.ativo !== false).map((artesao) => (
+                            <SelectItem key={artesao.id} value={artesao.id!}>
+                              {artesao.nome} - {artesao.aldeia}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {artesaos.length === 0 && (
+                        <p className="text-xs text-amber-400 mt-1">
+                          Nenhum artesão cadastrado. Cadastre primeiro em "Gerenciar Artesãos".
+                        </p>
+                      )}
                     </div>
                     <div>
                       <Label>Categoria *</Label>
@@ -232,7 +375,7 @@ const Artesanato = () => {
                     className="w-full bg-gold hover:bg-gold/90 text-green-dark font-semibold"
                     disabled={uploading}
                   >
-                    {uploading ? "Fazendo upload..." : "Salvar Artesanato"}
+                    {uploading ? "Fazendo upload..." : editingProduct ? "Atualizar Artesanato" : "Salvar Artesanato"}
                   </Button>
                 </form>
               </DialogContent>
@@ -293,16 +436,28 @@ const Artesanato = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="bg-card border-border/10 overflow-hidden hover:border-gold/30 transition-all">
-                  <img src={product.imageUrl} alt={product.nome} className="w-full h-48 object-cover" />
+                  <img 
+                    src={product.imageUrls?.[0] || "/placeholder.svg"} 
+                    alt={product.nome} 
+                    className="w-full h-48 object-cover" 
+                  />
                   <div className="p-4">
                     <h3 className="font-semibold text-foreground mb-1">{product.nome}</h3>
                     <p className="text-sm text-muted-foreground mb-1">Por: {product.artesaoNome}</p>
-                    <div className="flex gap-2 text-xs text-muted-foreground mb-4">
+                    <div className="flex gap-2 text-xs text-muted-foreground mb-2">
                       <span className="bg-green-medium/20 px-2 py-1 rounded">{product.categoria}</span>
                       <span className="bg-green-medium/20 px-2 py-1 rounded">{product.aldeia}</span>
                     </div>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      {product.imageUrls?.length || 0} imagem(ns)
+                    </p>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="flex-1 border-border/20 hover:bg-green-medium/20">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1 border-border/20 hover:bg-green-medium/20"
+                        onClick={() => openEditDialog(product)}
+                      >
                         <Edit className="w-3 h-3 mr-1" />
                         Editar
                       </Button>

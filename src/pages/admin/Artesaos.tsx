@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Edit, Trash2, Users } from "lucide-react";
+import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,13 +9,140 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { 
+  getArtesaos, 
+  addArtesao, 
+  updateArtesao, 
+  deleteArtesao,
+  getAldeias,
+  uploadImageCloudinary,
+  Artesao,
+  Aldeia 
+} from "@/lib/firestore";
 
 const Artesaos = () => {
-  const artisans = [
-    { id: 1, name: "Juma Karajá", aldeia: "Canoanã", whatsapp: "+55 63 99274-7396", status: true },
-    { id: 2, name: "Aranã Txuiri", aldeia: "Txuiri", whatsapp: "+55 63 99274-7396", status: true },
-    { id: 3, name: "Ijanaru Javaé", aldeia: "Canoanã", whatsapp: "+55 63 99274-7396", status: true },
-  ];
+  const [artesaos, setArtesaos] = useState<Artesao[]>([]);
+  const [aldeias, setAldeias] = useState<Aldeia[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [editingArtesao, setEditingArtesao] = useState<Artesao | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  
+  const [formData, setFormData] = useState({
+    nome: "",
+    whatsapp: "",
+    aldeia: "",
+    ativo: true
+  });
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    const [artesaosData, aldeiasData] = await Promise.all([
+      getArtesaos(),
+      getAldeias()
+    ]);
+    setArtesaos(artesaosData);
+    setAldeias(aldeiasData);
+    setLoading(false);
+  };
+
+  const resetForm = () => {
+    setFormData({ nome: "", whatsapp: "", aldeia: "", ativo: true });
+    setSelectedPhoto(null);
+    setExistingPhotoUrl("");
+    setEditingArtesao(null);
+  };
+
+  const openEditDialog = (artesao: Artesao) => {
+    setEditingArtesao(artesao);
+    setFormData({
+      nome: artesao.nome,
+      whatsapp: artesao.whatsapp,
+      aldeia: artesao.aldeia,
+      ativo: artesao.ativo !== false
+    });
+    setExistingPhotoUrl(artesao.fotoUrl || "");
+    setSelectedPhoto(null);
+    setDialogOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.nome || !formData.whatsapp || !formData.aldeia) {
+      toast.error("Por favor, preencha todos os campos obrigatórios.");
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      let fotoUrl = existingPhotoUrl;
+
+      // Upload da foto se uma nova foi selecionada
+      if (selectedPhoto) {
+        const uploadResult = await uploadImageCloudinary(selectedPhoto);
+        if (uploadResult.success) {
+          fotoUrl = uploadResult.url!;
+        } else {
+          toast.error("Erro ao fazer upload da foto.");
+          setUploading(false);
+          return;
+        }
+      }
+
+      const artesaoData = {
+        nome: formData.nome,
+        whatsapp: formData.whatsapp,
+        aldeia: formData.aldeia,
+        fotoUrl: fotoUrl,
+        ativo: formData.ativo
+      };
+
+      if (editingArtesao) {
+        const result = await updateArtesao(editingArtesao.id!, artesaoData);
+        if (result.success) {
+          toast.success("Artesão atualizado com sucesso!");
+        } else {
+          toast.error("Erro ao atualizar artesão.");
+        }
+      } else {
+        const result = await addArtesao(artesaoData);
+        if (result.success) {
+          toast.success("Artesão adicionado com sucesso!");
+        } else {
+          toast.error("Erro ao adicionar artesão.");
+        }
+      }
+
+      setDialogOpen(false);
+      resetForm();
+      loadData();
+    } catch (error) {
+      console.error("Erro:", error);
+      toast.error("Erro ao salvar artesão.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir este artesão?")) return;
+    
+    const result = await deleteArtesao(id);
+    if (result.success) {
+      toast.success("Artesão excluído com sucesso!");
+      loadData();
+    } else {
+      toast.error("Erro ao excluir artesão.");
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -28,7 +156,10 @@ const Artesaos = () => {
               <p className="text-muted-foreground">Adicione, edite ou remova artesãos</p>
             </div>
             
-            <Dialog>
+            <Dialog open={dialogOpen} onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) resetForm();
+            }}>
               <DialogTrigger asChild>
                 <Button className="bg-gold hover:bg-gold/90 text-green-dark font-semibold">
                   <Plus className="w-4 h-4 mr-2" />
@@ -37,77 +168,173 @@ const Artesaos = () => {
               </DialogTrigger>
               <DialogContent className="max-w-2xl bg-card">
                 <DialogHeader>
-                  <DialogTitle className="text-foreground">Adicionar Novo Artesão</DialogTitle>
+                  <DialogTitle className="text-foreground">
+                    {editingArtesao ? "Editar Artesão" : "Adicionar Novo Artesão"}
+                  </DialogTitle>
                 </DialogHeader>
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <Label htmlFor="artisan-name">Nome do Artesão</Label>
-                    <Input id="artisan-name" placeholder="Ex: Juma Karajá" className="bg-background" />
+                    <Label htmlFor="artisan-name">Nome do Artesão *</Label>
+                    <Input 
+                      id="artisan-name" 
+                      placeholder="Ex: Juma Karajá" 
+                      className="bg-background"
+                      value={formData.nome}
+                      onChange={(e) => setFormData({...formData, nome: e.target.value})}
+                      required
+                    />
                   </div>
                   <div>
                     <Label htmlFor="photo">Foto do Artesão</Label>
-                    <Input id="photo" type="file" accept="image/*" className="bg-background" />
+                    {existingPhotoUrl && !selectedPhoto ? (
+                      <div className="flex items-center gap-4 mt-2">
+                        <img 
+                          src={existingPhotoUrl} 
+                          alt="Foto atual" 
+                          className="w-16 h-16 rounded-full object-cover"
+                        />
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setExistingPhotoUrl("")}
+                        >
+                          Trocar foto
+                        </Button>
+                      </div>
+                    ) : (
+                      <Input 
+                        id="photo" 
+                        type="file" 
+                        accept="image/*" 
+                        className="bg-background"
+                        onChange={(e) => setSelectedPhoto(e.target.files?.[0] || null)}
+                      />
+                    )}
+                    {selectedPhoto && (
+                      <p className="text-xs text-green-400 mt-1">✓ {selectedPhoto.name}</p>
+                    )}
                   </div>
                   <div>
-                    <Label htmlFor="whatsapp">Link do WhatsApp</Label>
-                    <Input id="whatsapp" placeholder="+55 63 99999-9999" className="bg-background" />
+                    <Label htmlFor="whatsapp">Número do WhatsApp *</Label>
+                    <Input 
+                      id="whatsapp" 
+                      placeholder="5563999999999" 
+                      className="bg-background"
+                      value={formData.whatsapp}
+                      onChange={(e) => setFormData({...formData, whatsapp: e.target.value})}
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Formato: código do país + DDD + número (ex: 5563999999999)
+                    </p>
                   </div>
                   <div>
-                    <Label>Aldeia/Origem Principal</Label>
-                    <Select>
+                    <Label>Aldeia/Origem Principal *</Label>
+                    <Select 
+                      value={formData.aldeia} 
+                      onValueChange={(value) => setFormData({...formData, aldeia: value})}
+                    >
                       <SelectTrigger className="bg-background">
                         <SelectValue placeholder="Selecionar Aldeia" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="canoana">Canoanã</SelectItem>
-                        <SelectItem value="txuiri">Txuiri</SelectItem>
-                        <SelectItem value="pimentel">Pimentel Barbosa</SelectItem>
+                        {aldeias.map((aldeia) => (
+                          <SelectItem key={aldeia.id} value={aldeia.nome}>
+                            {aldeia.nome}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
+                    {aldeias.length === 0 && (
+                      <p className="text-xs text-amber-400 mt-1">
+                        Nenhuma aldeia cadastrada. Cadastre primeiro em "Configurações".
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center justify-between">
                     <Label htmlFor="status">Status Ativo</Label>
-                    <Switch id="status" />
+                    <Switch 
+                      id="status" 
+                      checked={formData.ativo}
+                      onCheckedChange={(checked) => setFormData({...formData, ativo: checked})}
+                    />
                   </div>
-                  <Button type="submit" className="w-full bg-gold hover:bg-gold/90 text-green-dark font-semibold">
-                    Salvar Artesão
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gold hover:bg-gold/90 text-green-dark font-semibold"
+                    disabled={uploading}
+                  >
+                    {uploading ? "Salvando..." : editingArtesao ? "Atualizar Artesão" : "Salvar Artesão"}
                   </Button>
                 </form>
               </DialogContent>
             </Dialog>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {artisans.map((artisan) => (
-              <Card key={artisan.id} className="p-6 bg-card border-border/10 hover:border-gold/30 transition-all">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-16 h-16 rounded-full bg-green-medium/30 flex items-center justify-center text-gold font-bold text-xl">
-                    {artisan.name.charAt(0)}
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Carregando artesãos...</p>
+            </div>
+          ) : artesaos.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                Nenhum artesão cadastrado ainda. Adicione o primeiro!
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {artesaos.map((artesao) => (
+                <Card key={artesao.id} className="p-6 bg-card border-border/10 hover:border-gold/30 transition-all">
+                  <div className="flex items-start gap-4 mb-4">
+                    {artesao.fotoUrl ? (
+                      <img 
+                        src={artesao.fotoUrl} 
+                        alt={artesao.nome}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-green-medium/30 flex items-center justify-center text-gold font-bold text-xl">
+                        {artesao.nome.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-foreground mb-1">{artesao.nome}</h3>
+                      <p className="text-sm text-muted-foreground mb-1">Aldeia {artesao.aldeia}</p>
+                      <p className="text-xs text-muted-foreground">{artesao.whatsapp}</p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground mb-1">{artisan.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-1">Aldeia {artisan.aldeia}</p>
-                    <p className="text-xs text-muted-foreground">{artisan.whatsapp}</p>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-muted-foreground">Status:</span>
+                    <span className={`text-sm font-medium ${artesao.ativo !== false ? 'text-green-light' : 'text-destructive'}`}>
+                      {artesao.ativo !== false ? 'Ativo' : 'Inativo'}
+                    </span>
                   </div>
-                </div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm text-muted-foreground">Status:</span>
-                  <span className={`text-sm font-medium ${artisan.status ? 'text-green-light' : 'text-destructive'}`}>
-                    {artisan.status ? 'Ativo' : 'Inativo'}
-                  </span>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 border-border/20 hover:bg-green-medium/20">
-                    <Edit className="w-3 h-3 mr-1" />
-                    Editar
-                  </Button>
-                  <Button variant="outline" size="sm" className="border-destructive/50 text-destructive hover:bg-destructive/10">
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 border-border/20 hover:bg-green-medium/20"
+                      onClick={() => openEditDialog(artesao)}
+                    >
+                      <Edit className="w-3 h-3 mr-1" />
+                      Editar
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                      onClick={() => artesao.id && handleDelete(artesao.id)}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>
