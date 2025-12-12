@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { ArrowLeft, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -79,13 +80,31 @@ const ArtesanatoDetalhe = () => {
   // Filtrar apenas URLs válidas
   const validImages = product.imageUrls?.filter(url => url && url.trim() !== "") || [];
 
-  // Configurar WhatsApp
-  const whatsappNumber = artesao?.whatsapp || "5563992747396";
-  const whatsappMessage = `Olá! Tenho interesse no produto: ${product.nome}`;
+  // Configurar WhatsApp com mensagem pré-preenchida
+  const whatsappNumber = artesao?.whatsapp?.replace(/\D/g, "") || "5563992747396";
+  const whatsappMessage = `Olá, tenho interesse no artesanato: ${product.nome}. Poderia me dar mais informações sobre preço e envio?`;
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
+
+  // Meta tags para SEO
+  const pageTitle = `${product.nome} - AWIRE DIGITAL`;
+  const pageDescription = product.descricao.substring(0, 160);
+  const pageImage = validImages[0] || "";
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={pageImage} />
+        <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={pageImage} />
+      </Helmet>
+
       <Navigation />
       <WhatsAppButton />
 
@@ -169,7 +188,12 @@ const ArtesanatoDetalhe = () => {
                     </div>
                   )}
                   <div>
-                    <p className="font-semibold text-foreground">{artesao?.nome || product.artesaoNome}</p>
+                    <Link 
+                      to={`/artesao/${artesao?.id || product.artesaoId}`}
+                      className="font-semibold text-foreground hover:text-primary transition-colors"
+                    >
+                      {artesao?.nome || product.artesaoNome}
+                    </Link>
                     <p className="text-sm text-muted-foreground">Aldeia {artesao?.aldeia || product.aldeia}</p>
                   </div>
                 </div>
