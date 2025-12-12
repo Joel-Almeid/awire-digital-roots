@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,17 @@ import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { getArtesanatos, getCategorias, getAldeias, getConfiguracoes, Artesanato as ArtesanatoType, Categoria, Aldeia } from "@/lib/firestore";
+import { 
+  getArtesanatos, 
+  getCategorias, 
+  getAldeias, 
+  getConfiguracoes, 
+  getArtesaos,
+  Artesanato as ArtesanatoType, 
+  Categoria, 
+  Aldeia,
+  Artesao 
+} from "@/lib/firestore";
 
 import heroBackground from "@/assets/hero-background.jpg";
 
@@ -17,9 +28,11 @@ const Artesanato = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("todas");
   const [aldeiaFilter, setAldeiaFilter] = useState("todas");
+  const [artesaoFilter, setArtesaoFilter] = useState("todos");
   const [crafts, setCrafts] = useState<ArtesanatoType[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [aldeias, setAldeias] = useState<Aldeia[]>([]);
+  const [artesaos, setArtesaos] = useState<Artesao[]>([]);
   const [textoComoFunciona, setTextoComoFunciona] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -27,15 +40,17 @@ const Artesanato = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const [craftsData, categoriasData, aldeiasData, configData] = await Promise.all([
+      const [craftsData, categoriasData, aldeiasData, artesaosData, configData] = await Promise.all([
         getArtesanatos(),
         getCategorias(),
         getAldeias(),
+        getArtesaos(),
         getConfiguracoes()
       ]);
       setCrafts(craftsData);
       setCategorias(categoriasData);
       setAldeias(aldeiasData);
+      setArtesaos(artesaosData.filter(a => a.ativo !== false));
       if (configData?.textoComoFunciona) {
         setTextoComoFunciona(configData.textoComoFunciona);
       }
@@ -48,11 +63,20 @@ const Artesanato = () => {
     const matchesSearch = craft.nome.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "todas" || craft.categoria === categoryFilter;
     const matchesAldeia = aldeiaFilter === "todas" || craft.aldeia === aldeiaFilter;
-    return matchesSearch && matchesCategory && matchesAldeia;
+    const matchesArtesao = artesaoFilter === "todos" || craft.artesaoId === artesaoFilter;
+    return matchesSearch && matchesCategory && matchesAldeia && matchesArtesao;
   });
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Artesanato Indígena - AWIRE DIGITAL</title>
+        <meta name="description" content="Conheça e adquira peças autênticas de artesanato indígena produzidas pelos artesãos das aldeias Canoanã e Txuiri na Ilha do Bananal." />
+        <meta property="og:title" content="Artesanato Indígena - AWIRE DIGITAL" />
+        <meta property="og:description" content="Conheça e adquira peças autênticas de artesanato indígena produzidas pelos artesãos das aldeias Canoanã e Txuiri na Ilha do Bananal." />
+        <meta property="og:image" content={heroBackground} />
+      </Helmet>
+
       <Navigation />
       <WhatsAppButton />
 
@@ -136,7 +160,7 @@ const Artesanato = () => {
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todas">Todas</SelectItem>
+                  <SelectItem value="todas">Todas Categorias</SelectItem>
                   {categorias.map((cat) => (
                     <SelectItem key={cat.id} value={cat.nome}>{cat.nome}</SelectItem>
                   ))}
@@ -148,9 +172,21 @@ const Artesanato = () => {
                   <SelectValue placeholder="Aldeia" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="todas">Todas</SelectItem>
+                  <SelectItem value="todas">Todas Aldeias</SelectItem>
                   {aldeias.map((ald) => (
                     <SelectItem key={ald.id} value={ald.nome}>{ald.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={artesaoFilter} onValueChange={setArtesaoFilter}>
+                <SelectTrigger className="w-full md:w-48 bg-card">
+                  <SelectValue placeholder="Artesão" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos Artesãos</SelectItem>
+                  {artesaos.map((art) => (
+                    <SelectItem key={art.id} value={art.id!}>{art.nome}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -187,8 +223,8 @@ const Artesanato = () => {
                     </div>
                     <div className="p-6">
                       <h3 className="text-xl font-bold text-foreground mb-2">{craft.nome}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">{craft.descricao}</p>
-                      <div className="flex gap-2 mb-4">
+                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{craft.descricao}</p>
+                      <div className="flex gap-2 mb-4 flex-wrap">
                         <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{craft.categoria}</span>
                         <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">{craft.aldeia}</span>
                       </div>

@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import Lightbox from "@/components/Lightbox";
+import { getFotos, Foto } from "@/lib/firestore";
 
 import heroBackground from "@/assets/hero-background.jpg";
 import foto1 from "@/assets/foto-1.jpg";
@@ -31,8 +33,21 @@ import foto23 from "@/assets/foto-23.jpg";
 
 const Fotos = () => {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [firestorePhotos, setFirestorePhotos] = useState<Foto[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const galleryItems = [
+  useEffect(() => {
+    const loadPhotos = async () => {
+      setLoading(true);
+      const photos = await getFotos();
+      setFirestorePhotos(photos);
+      setLoading(false);
+    };
+    loadPhotos();
+  }, []);
+
+  // Fotos estáticas (existentes)
+  const staticGalleryItems = [
     { type: "video" as const, src: "/videos/projeto-video.mp4", alt: "Vídeo do Projeto AWIRE DIGITAL" },
     { type: "video" as const, src: "/videos/projeto-video-2.mp4", alt: "Vídeo das atividades do Projeto AWIRE DIGITAL" },
     { type: "image" as const, src: foto1, alt: "Apresentação do Projeto AWIRE DIGITAL" },
@@ -60,8 +75,24 @@ const Fotos = () => {
     { type: "image" as const, src: foto23, alt: "Equipe do Projeto AWIRE DIGITAL" },
   ];
 
+  // Combinar fotos do Firestore com as estáticas
+  const firestoreItems = firestorePhotos.map(foto => ({
+    type: "image" as const,
+    src: foto.imageUrl,
+    alt: foto.legenda || "Foto do Projeto AWIRE DIGITAL"
+  }));
+
+  const allGalleryItems = [...firestoreItems, ...staticGalleryItems];
+
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>Galeria de Fotos - AWIRE DIGITAL</title>
+        <meta name="description" content="Veja momentos e memórias do Projeto AWIRE DIGITAL nas aldeias Canoanã e Txuiri na Ilha do Bananal." />
+        <meta property="og:title" content="Galeria de Fotos - AWIRE DIGITAL" />
+        <meta property="og:description" content="Veja momentos e memórias do Projeto AWIRE DIGITAL nas aldeias Canoanã e Txuiri na Ilha do Bananal." />
+      </Helmet>
+
       <Navigation />
       <WhatsAppButton />
 
@@ -86,33 +117,40 @@ const Fotos = () => {
       {/* Gallery Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {galleryItems.map((item, index) => (
-              <div
-                key={index}
-                className="aspect-square overflow-hidden rounded-lg shadow-md cursor-pointer hover-lift animate-fade-in relative"
-                style={{ animationDelay: `${index * 0.05}s` }}
-                onClick={() => item.type === "image" && setLightboxImage(item.src)}
-              >
-                {item.type === "video" ? (
-                  <video
-                    src={item.src}
-                    className="w-full h-full object-cover"
-                    controls
-                    preload="metadata"
-                  >
-                    Seu navegador não suporta vídeos.
-                  </video>
-                ) : (
-                  <img
-                    src={item.src}
-                    alt={item.alt}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Carregando galeria...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {allGalleryItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="aspect-square overflow-hidden rounded-lg shadow-md cursor-pointer hover-lift animate-fade-in relative"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                  onClick={() => item.type === "image" && setLightboxImage(item.src)}
+                >
+                  {item.type === "video" ? (
+                    <video
+                      src={item.src}
+                      className="w-full h-full object-cover"
+                      controls
+                      preload="metadata"
+                    >
+                      Seu navegador não suporta vídeos.
+                    </video>
+                  ) : (
+                    <img
+                      src={item.src}
+                      alt={item.alt}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

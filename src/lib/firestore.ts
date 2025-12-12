@@ -10,6 +10,8 @@ import {
   query,
   where,
   orderBy,
+  limit,
+  getCountFromServer,
   Timestamp 
 } from "firebase/firestore";
 import { db } from "./firebase";
@@ -34,6 +36,7 @@ export interface Artesao {
   fotoUrl: string;
   whatsapp: string;
   aldeia: string;
+  bio?: string;
   ativo: boolean;
   createdAt: Timestamp;
 }
@@ -43,6 +46,13 @@ export interface Foto {
   imageUrl: string;
   legenda: string;
   createdAt: Timestamp;
+}
+
+export interface ActivityLog {
+  id?: string;
+  action: string;
+  description: string;
+  timestamp: Timestamp;
 }
 
 // ===== STORAGE (CLOUDINARY) =====
@@ -79,6 +89,48 @@ export const deleteImage = async (imageUrl: string) => {
   return { success: true };
 };
 
+// ===== ACTIVITY LOG =====
+
+export const logActivity = async (action: string, description: string) => {
+  try {
+    await addDoc(collection(db, "activityLog"), {
+      action,
+      description,
+      timestamp: Timestamp.now()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao registrar atividade:", error);
+    return { success: false, error };
+  }
+};
+
+export const getRecentActivity = async (limitCount: number = 10): Promise<ActivityLog[]> => {
+  try {
+    const querySnapshot = await getDocs(
+      query(collection(db, "activityLog"), orderBy("timestamp", "desc"), limit(limitCount))
+    );
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ActivityLog[];
+  } catch (error) {
+    console.error("Erro ao buscar atividades recentes:", error);
+    return [];
+  }
+};
+
+export const getCollectionCount = async (collectionName: string): Promise<number> => {
+  try {
+    const coll = collection(db, collectionName);
+    const snapshot = await getCountFromServer(coll);
+    return snapshot.data().count;
+  } catch (error) {
+    console.error(`Erro ao contar documentos em ${collectionName}:`, error);
+    return 0;
+  }
+};
+
 // ===== ARTESANATO =====
 
 export const addArtesanato = async (artesanato: Omit<Artesanato, 'id' | 'createdAt'>) => {
@@ -87,6 +139,7 @@ export const addArtesanato = async (artesanato: Omit<Artesanato, 'id' | 'created
       ...artesanato,
       createdAt: Timestamp.now()
     });
+    await logActivity("Adição", `Novo Artesanato: "${artesanato.nome}" foi adicionado.`);
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Erro ao adicionar artesanato:", error);
@@ -123,9 +176,25 @@ export const getArtesanatoById = async (id: string): Promise<Artesanato | null> 
   }
 };
 
+export const getArtesanatosByArtesaoId = async (artesaoId: string): Promise<Artesanato[]> => {
+  try {
+    const querySnapshot = await getDocs(
+      query(collection(db, "artesanatos"), where("artesaoId", "==", artesaoId), orderBy("createdAt", "desc"))
+    );
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Artesanato[];
+  } catch (error) {
+    console.error("Erro ao buscar artesanatos por artesão:", error);
+    return [];
+  }
+};
+
 export const updateArtesanato = async (id: string, data: Partial<Artesanato>) => {
   try {
     await updateDoc(doc(db, "artesanatos", id), data);
+    await logActivity("Edição", `Artesanato "${data.nome || 'ID: ' + id}" foi atualizado.`);
     return { success: true };
   } catch (error) {
     console.error("Erro ao atualizar artesanato:", error);
@@ -133,9 +202,10 @@ export const updateArtesanato = async (id: string, data: Partial<Artesanato>) =>
   }
 };
 
-export const deleteArtesanato = async (id: string) => {
+export const deleteArtesanato = async (id: string, nome?: string) => {
   try {
     await deleteDoc(doc(db, "artesanatos", id));
+    await logActivity("Exclusão", `Artesanato "${nome || 'ID: ' + id}" foi excluído.`);
     return { success: true };
   } catch (error) {
     console.error("Erro ao excluir artesanato:", error);
@@ -151,6 +221,7 @@ export const addArtesao = async (artesao: Omit<Artesao, 'id' | 'createdAt'>) => 
       ...artesao,
       createdAt: Timestamp.now()
     });
+    await logActivity("Adição", `Novo Artesão: "${artesao.nome}" foi adicionado.`);
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Erro ao adicionar artesão:", error);
@@ -190,6 +261,7 @@ export const getArtesaoById = async (id: string): Promise<Artesao | null> => {
 export const updateArtesao = async (id: string, data: Partial<Artesao>) => {
   try {
     await updateDoc(doc(db, "artesaos", id), data);
+    await logActivity("Edição", `Artesão "${data.nome || 'ID: ' + id}" foi atualizado.`);
     return { success: true };
   } catch (error) {
     console.error("Erro ao atualizar artesão:", error);
@@ -197,9 +269,10 @@ export const updateArtesao = async (id: string, data: Partial<Artesao>) => {
   }
 };
 
-export const deleteArtesao = async (id: string) => {
+export const deleteArtesao = async (id: string, nome?: string) => {
   try {
     await deleteDoc(doc(db, "artesaos", id));
+    await logActivity("Exclusão", `Artesão "${nome || 'ID: ' + id}" foi excluído.`);
     return { success: true };
   } catch (error) {
     console.error("Erro ao excluir artesão:", error);
@@ -207,7 +280,7 @@ export const deleteArtesao = async (id: string) => {
   }
 };
 
-// ===== FOTOS =====
+// ===== FOTOS (GALERIA INSTITUCIONAL) =====
 
 export const addFoto = async (foto: Omit<Foto, 'id' | 'createdAt'>) => {
   try {
@@ -215,6 +288,7 @@ export const addFoto = async (foto: Omit<Foto, 'id' | 'createdAt'>) => {
       ...foto,
       createdAt: Timestamp.now()
     });
+    await logActivity("Adição", `Nova foto adicionada à galeria${foto.legenda ? `: "${foto.legenda}"` : "."}`);
     return { success: true, id: docRef.id };
   } catch (error) {
     console.error("Erro ao adicionar foto:", error);
@@ -237,9 +311,10 @@ export const getFotos = async () => {
   }
 };
 
-export const deleteFoto = async (id: string) => {
+export const deleteFoto = async (id: string, legenda?: string) => {
   try {
     await deleteDoc(doc(db, "fotos", id));
+    await logActivity("Exclusão", `Foto excluída da galeria${legenda ? `: "${legenda}"` : "."}`);
     return { success: true };
   } catch (error) {
     console.error("Erro ao excluir foto:", error);
