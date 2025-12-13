@@ -19,12 +19,16 @@ const ArtesanatoDetalhe = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadProduct = async () => {
       if (!id) return;
       
       setLoading(true);
       const productData = await getArtesanatoById(id);
       
+      if (!isMounted) return;
+
       if (productData) {
         setProduct(productData);
         // Definir a primeira imagem como principal
@@ -35,14 +39,22 @@ const ArtesanatoDetalhe = () => {
         // Buscar dados do artesão
         if (productData.artesaoId) {
           const artesaoData = await getArtesaoById(productData.artesaoId);
-          setArtesao(artesaoData);
+          if (isMounted) {
+            setArtesao(artesaoData);
+          }
         }
       }
       
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
     loadProduct();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (loading) {

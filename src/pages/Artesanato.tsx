@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
+import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,7 +11,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { 
-  getArtesanatos, 
+  getArtesanatosPaginated, 
   getCategorias, 
   getAldeias, 
   getConfiguracoes, 
@@ -18,10 +19,14 @@ import {
   Artesanato as ArtesanatoType, 
   Categoria, 
   Aldeia,
-  Artesao 
+  Artesao,
+  PaginatedResult
 } from "@/lib/firestore";
+import { QueryDocumentSnapshot, DocumentData } from "firebase/firestore";
 
 import heroBackground from "@/assets/hero-background.jpg";
+
+const ITEMS_PER_PAGE = 12;
 
 const Artesanato = () => {
   const navigate = useNavigate();
@@ -29,36 +34,74 @@ const Artesanato = () => {
   const [categoryFilter, setCategoryFilter] = useState("todas");
   const [aldeiaFilter, setAldeiaFilter] = useState("todas");
   const [artesaoFilter, setArtesaoFilter] = useState("todos");
+  
   const [crafts, setCrafts] = useState<ArtesanatoType[]>([]);
+  const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [aldeias, setAldeias] = useState<Aldeia[]>([]);
   const [artesaos, setArtesaos] = useState<Artesao[]>([]);
-  const [textoComoFunciona, setTextoComoFunciona] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Carregar dados do Firestore
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: false
+  });
+
+  // Carregar dados iniciais
   useEffect(() => {
-    const loadData = async () => {
+    let isMounted = true;
+
+    const loadInitialData = async () => {
       setLoading(true);
-      const [craftsData, categoriasData, aldeiasData, artesaosData, configData] = await Promise.all([
-        getArtesanatos(),
+      const [result, categoriasData, aldeiasData, artesaosData] = await Promise.all([
+        getArtesanatosPaginated(ITEMS_PER_PAGE),
         getCategorias(),
         getAldeias(),
-        getArtesaos(),
-        getConfiguracoes()
+        getArtesaos()
       ]);
-      setCrafts(craftsData);
+      
+      if (!isMounted) return;
+      
+      setCrafts(result.items);
+      setLastDoc(result.lastDoc);
+      setHasMore(result.hasMore);
       setCategorias(categoriasData);
       setAldeias(aldeiasData);
       setArtesaos(artesaosData.filter(a => a.ativo !== false));
-      if (configData?.textoComoFunciona) {
-        setTextoComoFunciona(configData.textoComoFunciona);
-      }
       setLoading(false);
     };
-    loadData();
+    
+    loadInitialData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
+  // Função para carregar mais itens
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || !lastDoc) return;
+    
+    setLoadingMore(true);
+    const result = await getArtesanatosPaginated(ITEMS_PER_PAGE, lastDoc);
+    
+    setCrafts(prev => [...prev, ...result.items]);
+    setLastDoc(result.lastDoc);
+    setHasMore(result.hasMore);
+    setLoadingMore(false);
+  }, [lastDoc, hasMore, loadingMore]);
+
+  // Carregar mais quando o elemento estiver visível
+  useEffect(() => {
+    if (inView && hasMore && !loadingMore && !loading) {
+      loadMore();
+    }
+  }, [inView, hasMore, loadingMore, loading, loadMore]);
+
+  // Filtrar os crafts localmente
   const filteredCrafts = crafts.filter((craft) => {
     const matchesSearch = craft.nome.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = categoryFilter === "todas" || craft.categoria === categoryFilter;
@@ -207,37 +250,71 @@ const Artesanato = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredCrafts.map((craft, index) => (
-                  <Card
-                    key={craft.id}
-                    className="overflow-hidden bg-card border-border hover-lift animate-fade-in"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="aspect-square overflow-hidden">
-                      <img
-                        src={craft.imageUrls?.[0] || "/placeholder.svg"}
-                        alt={craft.nome}
-                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-foreground mb-2">{craft.nome}</h3>
-                      <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{craft.descricao}</p>
-                      <div className="flex gap-2 mb-4 flex-wrap">
-                        <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{craft.categoria}</span>
-                        <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">{craft.aldeia}</span>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredCrafts.map((craft, index) => (
+                    <Card
+                      key={craft.id}
+                      className="overflow-hidden bg-card border-border hover-lift animate-fade-in"
+                      style={{ animationDelay: `${Math.min(index, 5) * 0.1}s` }}
+                    >
+                      <div className="aspect-square overflow-hidden">
+                        <img
+                          src={craft.imageUrls?.[0] || "/placeholder.svg"}
+                          alt={craft.nome}
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                        />
                       </div>
-                      <Button 
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                        onClick={() => navigate(`/artesanato/${craft.id}`)}
+                      <div className="p-6">
+                        <h3 className="text-xl font-bold text-foreground mb-2">{craft.nome}</h3>
+                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{craft.descricao}</p>
+                        
+                        {/* Link para o artesão */}
+                        {craft.artesaoId && craft.artesaoNome && (
+                          <Link 
+                            to={`/artesao/${craft.artesaoId}`}
+                            className="text-sm text-primary hover:text-primary/80 hover:underline mb-3 block"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Artesão: {craft.artesaoNome}
+                          </Link>
+                        )}
+                        
+                        <div className="flex gap-2 mb-4 flex-wrap">
+                          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{craft.categoria}</span>
+                          <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">{craft.aldeia}</span>
+                        </div>
+                        <Button 
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                          onClick={() => navigate(`/artesanato/${craft.id}`)}
+                        >
+                          Ver Detalhes
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Infinite Scroll Trigger / Load More Button */}
+                {hasMore && (
+                  <div ref={loadMoreRef} className="flex justify-center mt-12">
+                    {loadingMore ? (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>Carregando mais...</span>
+                      </div>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        onClick={loadMore}
+                        className="border-primary/20 hover:bg-primary/10"
                       >
-                        Ver Detalhes
+                        Carregar Mais
                       </Button>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

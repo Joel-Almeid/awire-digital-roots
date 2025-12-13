@@ -17,21 +17,37 @@ const ArtesaoPerfil = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadData = async () => {
       if (!id) return;
       
       setLoading(true);
-      const [artesaoData, productsData] = await Promise.all([
-        getArtesaoById(id),
-        getArtesanatosByArtesaoId(id)
-      ]);
       
-      setArtesao(artesaoData);
-      setProducts(productsData);
-      setLoading(false);
+      try {
+        const artesaoData = await getArtesaoById(id);
+        if (!isMounted) return;
+        setArtesao(artesaoData);
+
+        if (artesaoData) {
+          const productsData = await getArtesanatosByArtesaoId(id);
+          if (!isMounted) return;
+          setProducts(productsData);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar dados do artesão:", error);
+      }
+      
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
     loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (loading) {
