@@ -1,4 +1,4 @@
-import { Home, Package, Users, Image, Settings, LogOut } from "lucide-react";
+import { Home, Package, Users, Image, Settings, LogOut, BarChart3 } from "lucide-react";
 import { NavLink } from "./NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import logoAwire from "@/assets/logo-awire.png";
@@ -11,6 +11,7 @@ export const AdminSidebar = () => {
     { icon: Package, label: "Artesanato", path: "/admin/artesanato" },
     { icon: Users, label: "Artesãos", path: "/admin/artesaos" },
     { icon: Image, label: "Galeria de Fotos", path: "/admin/fotos" },
+    { icon: BarChart3, label: "Estatísticas", path: "/admin/estatisticas" },
     { icon: Settings, label: "Configurações", path: "/admin/configuracoes" },
   ];
 

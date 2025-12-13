@@ -17,6 +17,7 @@ import Dashboard from "./pages/admin/Dashboard";
 import AdminArtesanato from "./pages/admin/Artesanato";
 import AdminArtesaos from "./pages/admin/Artesaos";
 import AdminFotos from "./pages/admin/Fotos";
+import Estatisticas from "./pages/admin/Estatisticas";
 import Configuracoes from "./pages/admin/Configuracoes";
 import NotFound from "./pages/NotFound";
 
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/admin/artesanato" element={<ProtectedRoute><AdminArtesanato /></ProtectedRoute>} />
               <Route path="/admin/artesaos" element={<ProtectedRoute><AdminArtesaos /></ProtectedRoute>} />
               <Route path="/admin/fotos" element={<ProtectedRoute><AdminFotos /></ProtectedRoute>} />
+              <Route path="/admin/estatisticas" element={<ProtectedRoute><Estatisticas /></ProtectedRoute>} />
               <Route path="/admin/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

@@ -10,6 +10,8 @@ interface LightboxProps {
 
 const Lightbox = ({ image, alt = "", onClose }: LightboxProps) => {
   useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
@@ -21,7 +23,7 @@ const Lightbox = ({ image, alt = "", onClose }: LightboxProps) => {
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = originalOverflow || "unset";
     };
   }, [onClose]);
 

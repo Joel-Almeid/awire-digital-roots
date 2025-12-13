@@ -11,8 +11,11 @@ import {
   where,
   orderBy,
   limit,
+  startAfter,
   getCountFromServer,
-  Timestamp 
+  Timestamp,
+  QueryDocumentSnapshot,
+  DocumentData
 } from "firebase/firestore";
 import { db } from "./firebase";
 import axios from "axios";
@@ -162,6 +165,54 @@ export const getArtesanatos = async () => {
   }
 };
 
+// Interface para retorno paginado
+export interface PaginatedResult<T> {
+  items: T[];
+  lastDoc: QueryDocumentSnapshot<DocumentData> | null;
+  hasMore: boolean;
+}
+
+export const getArtesanatosPaginated = async (
+  limitCount: number = 12,
+  lastVisible?: QueryDocumentSnapshot<DocumentData> | null
+): Promise<PaginatedResult<Artesanato>> => {
+  try {
+    let q = query(
+      collection(db, "artesanatos"),
+      orderBy("createdAt", "desc"),
+      limit(limitCount)
+    );
+
+    if (lastVisible) {
+      q = query(
+        collection(db, "artesanatos"),
+        orderBy("createdAt", "desc"),
+        startAfter(lastVisible),
+        limit(limitCount)
+      );
+    }
+
+    const querySnapshot = await getDocs(q);
+    const items = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Artesanato[];
+
+    const lastDoc = querySnapshot.docs.length > 0 
+      ? querySnapshot.docs[querySnapshot.docs.length - 1] 
+      : null;
+
+    return {
+      items,
+      lastDoc,
+      hasMore: querySnapshot.docs.length === limitCount
+    };
+  } catch (error) {
+    console.error("Erro ao buscar artesanatos paginados:", error);
+    return { items: [], lastDoc: null, hasMore: false };
+  }
+};
+
 export const getArtesanatoById = async (id: string): Promise<Artesanato | null> => {
   try {
     const docRef = doc(db, "artesanatos", id);
@@ -178,13 +229,21 @@ export const getArtesanatoById = async (id: string): Promise<Artesanato | null> 
 
 export const getArtesanatosByArtesaoId = async (artesaoId: string): Promise<Artesanato[]> => {
   try {
+    // Query simples sem orderBy para evitar necessidade de índice composto
     const querySnapshot = await getDocs(
-      query(collection(db, "artesanatos"), where("artesaoId", "==", artesaoId), orderBy("createdAt", "desc"))
+      query(collection(db, "artesanatos"), where("artesaoId", "==", artesaoId))
     );
-    return querySnapshot.docs.map(doc => ({
+    const items = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Artesanato[];
+    
+    // Ordenar manualmente por createdAt desc
+    return items.sort((a, b) => {
+      const dateA = a.createdAt?.toDate?.() || new Date(0);
+      const dateB = b.createdAt?.toDate?.() || new Date(0);
+      return dateB.getTime() - dateA.getTime();
+    });
   } catch (error) {
     console.error("Erro ao buscar artesanatos por artesão:", error);
     return [];
@@ -308,6 +367,47 @@ export const getFotos = async () => {
   } catch (error) {
     console.error("Erro ao buscar fotos:", error);
     return [];
+  }
+};
+
+export const getFotosPaginated = async (
+  limitCount: number = 20,
+  lastVisible?: QueryDocumentSnapshot<DocumentData> | null
+): Promise<PaginatedResult<Foto>> => {
+  try {
+    let q = query(
+      collection(db, "fotos"),
+      orderBy("createdAt", "desc"),
+      limit(limitCount)
+    );
+
+    if (lastVisible) {
+      q = query(
+        collection(db, "fotos"),
+        orderBy("createdAt", "desc"),
+        startAfter(lastVisible),
+        limit(limitCount)
+      );
+    }
+
+    const querySnapshot = await getDocs(q);
+    const items = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Foto[];
+
+    const lastDoc = querySnapshot.docs.length > 0 
+      ? querySnapshot.docs[querySnapshot.docs.length - 1] 
+      : null;
+
+    return {
+      items,
+      lastDoc,
+      hasMore: querySnapshot.docs.length === limitCount
+    };
+  } catch (error) {
+    console.error("Erro ao buscar fotos paginadas:", error);
+    return { items: [], lastDoc: null, hasMore: false };
   }
 };
 
