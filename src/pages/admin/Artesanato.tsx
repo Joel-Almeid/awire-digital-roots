@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Search, Package, X } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Package, X, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { exportArtesanatosCSV, exportArtesanatosPDF } from "@/lib/exportUtils";
 import { 
   getArtesanatos, 
   addArtesanato, 
@@ -222,23 +223,58 @@ const Artesanato = () => {
     return matchesSearch && matchesCategory && matchesAldeia;
   });
 
+  const handleExportCSV = () => {
+    if (products.length === 0) {
+      toast.error("Não há artesanatos para exportar.");
+      return;
+    }
+    exportArtesanatosCSV(products);
+    toast.success("CSV exportado com sucesso!");
+  };
+
+  const handleExportPDF = () => {
+    if (products.length === 0) {
+      toast.error("Não há artesanatos para exportar.");
+      return;
+    }
+    exportArtesanatosPDF(products);
+    toast.success("PDF exportado com sucesso!");
+  };
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">Gerenciar Artesanato</h1>
               <p className="text-muted-foreground">Adicione, edite ou remova produtos</p>
             </div>
             
-            <Dialog open={dialogOpen} onOpenChange={(open) => {
-              setDialogOpen(open);
-              if (!open) resetForm();
-            }}>
-              <DialogTrigger asChild>
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleExportCSV}
+                className="border-border/20 hover:bg-green-medium/20"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar CSV
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleExportPDF}
+                className="border-border/20 hover:bg-green-medium/20"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Exportar PDF
+              </Button>
+              <Dialog open={dialogOpen} onOpenChange={(open) => {
+                setDialogOpen(open);
+                if (!open) resetForm();
+              }}>
+                <DialogTrigger asChild>
                 <Button className="bg-gold hover:bg-gold/90 text-green-dark font-semibold">
                   <Plus className="w-4 h-4 mr-2" />
                   Adicionar Novo Artesanato
@@ -379,7 +415,8 @@ const Artesanato = () => {
                   </Button>
                 </form>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </div>
 
           <Card className="p-6 bg-card border-border/10 mb-6">
