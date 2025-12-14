@@ -184,32 +184,31 @@ const ArtesanatoDetalhe = () => {
                 <span className="text-sm bg-secondary/50 text-foreground px-3 py-1 rounded">{product.aldeia}</span>
               </div>
 
-              {/* Artisan Card */}
-              <Card className="p-6 bg-card border-border mb-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Sobre o Artesão</h3>
-                <div className="flex items-center gap-4">
-                  {artesao?.fotoUrl ? (
-                    <img
-                      src={artesao.fotoUrl}
-                      alt={artesao.nome}
-                      className="w-16 h-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
-                      {(artesao?.nome || product.artesaoNome).charAt(0)}
+              {/* Artisan Card - Fully Clickable */}
+              <Link to={`/artesao/${artesao?.id || product.artesaoId}`}>
+                <Card className="p-6 bg-card border-border mb-6 cursor-pointer hover:bg-card/80 transition-colors group">
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Sobre o Artesão</h3>
+                  <div className="flex items-center gap-4">
+                    {artesao?.fotoUrl ? (
+                      <img
+                        src={artesao.fotoUrl}
+                        alt={artesao.nome}
+                        className="w-16 h-16 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
+                        {(artesao?.nome || product.artesaoNome).charAt(0)}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                        {artesao?.nome || product.artesaoNome}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Aldeia {artesao?.aldeia || product.aldeia}</p>
                     </div>
-                  )}
-                  <div>
-                    <Link 
-                      to={`/artesao/${artesao?.id || product.artesaoId}`}
-                      className="font-semibold text-foreground hover:text-primary transition-colors"
-                    >
-                      {artesao?.nome || product.artesaoNome}
-                    </Link>
-                    <p className="text-sm text-muted-foreground">Aldeia {artesao?.aldeia || product.aldeia}</p>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </Link>
 
               {/* Description */}
               <div className="mb-8">
