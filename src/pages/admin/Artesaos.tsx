@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Users } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Download, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { exportArtesaosCSV, exportArtesaosPDF } from "@/lib/exportUtils";
 import { 
   getArtesaos, 
   addArtesao, 
@@ -144,28 +145,63 @@ const Artesaos = () => {
     }
   };
 
+  const handleExportCSV = () => {
+    if (artesaos.length === 0) {
+      toast.error("Não há artesãos para exportar.");
+      return;
+    }
+    exportArtesaosCSV(artesaos);
+    toast.success("CSV exportado com sucesso!");
+  };
+
+  const handleExportPDF = () => {
+    if (artesaos.length === 0) {
+      toast.error("Não há artesãos para exportar.");
+      return;
+    }
+    exportArtesaosPDF(artesaos);
+    toast.success("PDF exportado com sucesso!");
+  };
+
   return (
     <div className="flex min-h-screen bg-background">
       <AdminSidebar />
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">Gerenciar Artesãos</h1>
               <p className="text-muted-foreground">Adicione, edite ou remova artesãos</p>
             </div>
             
-            <Dialog open={dialogOpen} onOpenChange={(open) => {
-              setDialogOpen(open);
-              if (!open) resetForm();
-            }}>
-              <DialogTrigger asChild>
-                <Button className="bg-gold hover:bg-gold/90 text-green-dark font-semibold">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Adicionar Novo Artesão
-                </Button>
-              </DialogTrigger>
+            <div className="flex flex-wrap gap-2">
+              <Button 
+                variant="outline" 
+                onClick={handleExportCSV}
+                className="border-border/20 hover:bg-green-medium/20"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Exportar CSV
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={handleExportPDF}
+                className="border-border/20 hover:bg-green-medium/20"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Exportar PDF
+              </Button>
+              <Dialog open={dialogOpen} onOpenChange={(open) => {
+                setDialogOpen(open);
+                if (!open) resetForm();
+              }}>
+                <DialogTrigger asChild>
+                  <Button className="bg-gold hover:bg-gold/90 text-green-dark font-semibold">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Adicionar Novo Artesão
+                  </Button>
+                </DialogTrigger>
               <DialogContent className="max-w-2xl bg-card">
                 <DialogHeader>
                   <DialogTitle className="text-foreground">
@@ -269,7 +305,8 @@ const Artesaos = () => {
                   </Button>
                 </form>
               </DialogContent>
-            </Dialog>
+              </Dialog>
+            </div>
           </div>
 
           {loading ? (
