@@ -91,23 +91,28 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-muted-foreground">
-              © 2025 AWIRE DIGITAL. Todos os direitos reservados.
-            </p>
-            <div className="flex items-center gap-4 text-sm">
-              <Link to="/login" className="text-muted-foreground hover:text-primary transition-colors">
-                Login
-              </Link>
-              <span className="text-muted-foreground">•</span>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Termos de Uso
-              </a>
-              <span className="text-muted-foreground">•</span>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                Política de Privacidade
-              </a>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-sm text-muted-foreground">
+                © 2025 AWIRE DIGITAL. Todos os direitos reservados.
+              </p>
+              <div className="flex items-center gap-4 text-sm flex-wrap justify-center">
+                <Link to="/login" className="text-muted-foreground hover:text-primary transition-colors">
+                  Login
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link to="/termos" className="text-muted-foreground hover:text-primary transition-colors">
+                  Termos de Uso
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link to="/privacidade" className="text-muted-foreground hover:text-primary transition-colors">
+                  Política de Privacidade
+                </Link>
+              </div>
             </div>
+            <p className="text-xs text-muted-foreground text-center">
+              Desenvolvido por Joel Abreu Martins de Almeida / IFTO. Todos os direitos reservados conforme Lei nº 9.610/98.
+            </p>
           </div>
         </div>
       </div>

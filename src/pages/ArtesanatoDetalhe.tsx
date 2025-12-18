@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, MessageCircle } from "lucide-react";
+import { ArrowLeft, MessageCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
@@ -184,24 +184,27 @@ const ArtesanatoDetalhe = () => {
                 <span className="text-sm bg-secondary/50 text-foreground px-3 py-1 rounded">{product.aldeia}</span>
               </div>
 
-              {/* Artisan Card - Fully Clickable */}
+              {/* Artisan Card - Fully Clickable with Hover Animation */}
               <Link to={`/artesao/${artesao?.id || product.artesaoId}`}>
-                <Card className="p-6 bg-card border-border mb-6 cursor-pointer hover:bg-card/80 transition-colors group">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Sobre o Artesão</h3>
-                  <div className="flex items-center gap-4">
+                <Card className="p-6 bg-card border-border mb-6 cursor-pointer transition-all duration-300 ease-out group hover:shadow-lg hover:shadow-primary/10 hover:scale-[1.02] hover:border-primary/30 active:scale-[0.99]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-foreground">Sobre o Artesão</h3>
+                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
+                  </div>
+                  <div className="flex items-center gap-4 mt-4">
                     {artesao?.fotoUrl ? (
                       <img
                         src={artesao.fotoUrl}
                         alt={artesao.nome}
-                        className="w-16 h-16 rounded-full object-cover"
+                        className="w-16 h-16 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/30 transition-all duration-300"
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl ring-2 ring-transparent group-hover:ring-primary/30 transition-all duration-300">
                         {(artesao?.nome || product.artesaoNome).charAt(0)}
                       </div>
                     )}
-                    <div>
-                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                    <div className="flex-1">
+                      <p className="font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
                         {artesao?.nome || product.artesaoNome}
                       </p>
                       <p className="text-sm text-muted-foreground">Aldeia {artesao?.aldeia || product.aldeia}</p>
