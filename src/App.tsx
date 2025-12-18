@@ -6,11 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import ConsentBanner from "@/components/ConsentBanner";
 import Index from "./pages/Index";
 import Artesanato from "./pages/Artesanato";
 import ArtesanatoDetalhe from "./pages/ArtesanatoDetalhe";
 import ArtesaoPerfil from "./pages/ArtesaoPerfil";
 import Fotos from "./pages/Fotos";
+import Privacidade from "./pages/Privacidade";
+import Termos from "./pages/Termos";
 import Login from "./pages/Login";
 import AdminSplash from "./pages/admin/AdminSplash";
 import Dashboard from "./pages/admin/Dashboard";
@@ -37,6 +40,8 @@ const App = () => (
               <Route path="/artesanato/:id" element={<ArtesanatoDetalhe />} />
               <Route path="/artesao/:id" element={<ArtesaoPerfil />} />
               <Route path="/fotos" element={<Fotos />} />
+              <Route path="/privacidade" element={<Privacidade />} />
+              <Route path="/termos" element={<Termos />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin" element={<ProtectedRoute><AdminSplash /></ProtectedRoute>} />
               <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -48,6 +53,7 @@ const App = () => (
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <ConsentBanner />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
