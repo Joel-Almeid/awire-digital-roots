@@ -1,27 +1,31 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Users, Download, FileText, Eye, Upload, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Download, FileText, Eye, Upload, Loader2, CheckCircle, XCircle, Package, X } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { exportArtesaosCSV, exportArtesaosPDF } from "@/lib/exportUtils";
 import { uploadDocumentCloudinary } from "@/lib/cloudinaryUpload";
 import { 
   getArtesaos, 
   addArtesao, 
-  updateArtesao, 
+  updateArtesaoWithCascade, 
   deleteArtesao,
   getAldeias,
+  getArtesanatosByArtesaoId,
   uploadImageCloudinary,
   Artesao,
-  Aldeia 
+  Aldeia,
+  Artesanato
 } from "@/lib/firestore";
 
 const Artesaos = () => {
@@ -36,12 +40,19 @@ const Artesaos = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [selectedTermo, setSelectedTermo] = useState<File | null>(null);
   
+  // Modal de produtos
+  const [productsModalOpen, setProductsModalOpen] = useState(false);
+  const [selectedArtesaoProducts, setSelectedArtesaoProducts] = useState<Artesanato[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [selectedArtesaoName, setSelectedArtesaoName] = useState("");
+  
   const [formData, setFormData] = useState({
     nome: "",
     whatsapp: "",
     aldeia: "",
     ativo: true,
-    urlTermoAssinado: ""
+    urlTermoAssinado: "",
+    bio: ""
   });
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
 
@@ -61,7 +72,7 @@ const Artesaos = () => {
   };
 
   const resetForm = () => {
-    setFormData({ nome: "", whatsapp: "", aldeia: "", ativo: true, urlTermoAssinado: "" });
+    setFormData({ nome: "", whatsapp: "", aldeia: "", ativo: true, urlTermoAssinado: "", bio: "" });
     setSelectedPhoto(null);
     setSelectedTermo(null);
     setExistingPhotoUrl("");
@@ -76,12 +87,39 @@ const Artesaos = () => {
       whatsapp: artesao.whatsapp,
       aldeia: artesao.aldeia,
       ativo: artesao.ativo !== false,
-      urlTermoAssinado: artesao.urlTermoAssinado || ""
+      urlTermoAssinado: artesao.urlTermoAssinado || "",
+      bio: artesao.bio || ""
     });
     setExistingPhotoUrl(artesao.fotoUrl || "");
     setSelectedPhoto(null);
     setSelectedTermo(null);
     setDialogOpen(true);
+  };
+
+  // Função para ver produtos do artesão
+  const handleViewProducts = async (artesao: Artesao) => {
+    if (!artesao.id) return;
+    
+    setLoadingProducts(true);
+    setSelectedArtesaoName(artesao.nome);
+    setProductsModalOpen(true);
+    
+    const products = await getArtesanatosByArtesaoId(artesao.id);
+    setSelectedArtesaoProducts(products);
+    setLoadingProducts(false);
+  };
+
+  // Função para excluir termo de adesão
+  const handleDeleteTermo = async (artesao: Artesao) => {
+    if (!artesao.id) return;
+    
+    const result = await updateArtesaoWithCascade(artesao.id, { urlTermoAssinado: "" });
+    if (result.success) {
+      toast.success("Termo de adesão removido com sucesso!");
+      loadData();
+    } else {
+      toast.error("Erro ao remover termo.");
+    }
   };
 
   const handleTermoUpload = async (file: File) => {
@@ -145,12 +183,13 @@ const Artesaos = () => {
         whatsapp: formData.whatsapp,
         aldeia: formData.aldeia,
         fotoUrl: fotoUrl,
+        bio: formData.bio,
         ativo: formData.ativo,
         urlTermoAssinado: formData.urlTermoAssinado
       };
 
       if (editingArtesao) {
-        const result = await updateArtesao(editingArtesao.id!, artesaoData);
+        const result = await updateArtesaoWithCascade(editingArtesao.id!, artesaoData);
         if (result.success) {
           toast.success("Artesão atualizado com sucesso!");
         } else {
@@ -342,6 +381,21 @@ const Artesaos = () => {
                     )}
                   </div>
 
+                  {/* Biografia / Minha História */}
+                  <div>
+                    <Label htmlFor="bio">Biografia / Minha História</Label>
+                    <Textarea 
+                      id="bio" 
+                      placeholder="Conte um pouco sobre a história e a jornada deste artesão..." 
+                      className="bg-background min-h-[100px]"
+                      value={formData.bio}
+                      onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Esta biografia será exibida na página pública do artesão.
+                    </p>
+                  </div>
+
                   {/* Termo de Adesão Section */}
                   <div className="border-t border-border pt-4">
                     <Label htmlFor="termo" className="flex items-center gap-2">
@@ -492,7 +546,7 @@ const Artesaos = () => {
                         onClick={() => window.open(artesao.urlTermoAssinado, '_blank')}
                       >
                         <Eye className="w-3 h-3 mr-1" />
-                        Ver Termo
+                        Ver
                       </Button>
                       <Button
                         variant="outline"
@@ -503,8 +557,48 @@ const Artesaos = () => {
                         <Download className="w-3 h-3 mr-1" />
                         Baixar
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remover Termo de Adesão?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Deseja remover o termo anexado de {artesao.nome}? 
+                              O status voltará para "Pendente". Esta ação não exclui o artesão.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteTermo(artesao)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Remover Termo
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   )}
+
+                  {/* Ver Produtos Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full mb-4 border-primary/30 text-primary hover:bg-primary/10"
+                    onClick={() => handleViewProducts(artesao)}
+                  >
+                    <Package className="w-3 h-3 mr-1" />
+                    Ver Produtos Cadastrados
+                  </Button>
 
                   <div className="flex gap-2">
                     <Button 
@@ -531,6 +625,47 @@ const Artesaos = () => {
           )}
         </div>
       </main>
+
+      {/* Modal de Produtos do Artesão */}
+      <Dialog open={productsModalOpen} onOpenChange={setProductsModalOpen}>
+        <DialogContent className="max-w-2xl bg-card max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">
+              Produtos de {selectedArtesaoName}
+            </DialogTitle>
+            <DialogDescription>
+              Lista de artesanatos cadastrados por este artesão
+            </DialogDescription>
+          </DialogHeader>
+          
+          {loadingProducts ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : selectedArtesaoProducts.length === 0 ? (
+            <div className="text-center py-8">
+              <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Nenhum produto cadastrado.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {selectedArtesaoProducts.map((product) => (
+                <div key={product.id} className="flex items-center gap-4 p-3 bg-background rounded-lg">
+                  <img 
+                    src={product.imageUrls?.[0] || "/placeholder.svg"} 
+                    alt={product.nome}
+                    className="w-16 h-16 rounded object-cover"
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-foreground">{product.nome}</h4>
+                    <p className="text-sm text-muted-foreground">{product.categoria}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

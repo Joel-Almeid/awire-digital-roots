@@ -45,6 +45,34 @@ export interface Artesao {
   createdAt: Timestamp;
 }
 
+// Update artisan name across all products (cascade update)
+export const updateArtesaoWithCascade = async (id: string, data: Partial<Artesao>) => {
+  try {
+    // Update the artisan document
+    await updateDoc(doc(db, "artesaos", id), data);
+    
+    // If name was updated, update all products by this artisan
+    if (data.nome) {
+      const productsQuery = query(collection(db, "artesanatos"), where("artesaoId", "==", id));
+      const productsSnapshot = await getDocs(productsQuery);
+      
+      const updatePromises = productsSnapshot.docs.map(productDoc => 
+        updateDoc(doc(db, "artesanatos", productDoc.id), { artesaoNome: data.nome })
+      );
+      
+      await Promise.all(updatePromises);
+      await logActivity("Edição", `Artesão "${data.nome}" atualizado. ${productsSnapshot.docs.length} produto(s) sincronizado(s).`);
+    } else {
+      await logActivity("Edição", `Artesão "${data.nome || 'ID: ' + id}" foi atualizado.`);
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("Erro ao atualizar artesão com cascade:", error);
+    return { success: false, error };
+  }
+};
+
 export interface Foto {
   id?: string;
   imageUrl: string;
