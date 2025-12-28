@@ -28,6 +28,7 @@ const Configuracoes = () => {
   // Estados para configurações
   const [textoComoFunciona, setTextoComoFunciona] = useState("");
   const [textoSobreProjeto, setTextoSobreProjeto] = useState("");
+  const [notaComoFunciona, setNotaComoFunciona] = useState("");
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(true);
 
@@ -58,10 +59,12 @@ const Configuracoes = () => {
     if (config) {
       setTextoComoFunciona(config.textoComoFunciona);
       setTextoSobreProjeto(config.textoSobreProjeto);
+      setNotaComoFunciona(config.notaComoFunciona || "");
     } else {
       // Valores padrão
       setTextoComoFunciona("1. Navegue pela galeria e escolha as peças que mais lhe agradam\n2. Clique no botão 'Ver Detalhes' para conhecer mais sobre o produto\n3. Entre em contato diretamente com o artesão via WhatsApp\n4. Negocie valores, formas de pagamento e entrega\n5. Receba sua peça única, feita com tradição e carinho");
       setTextoSobreProjeto("O projeto de extensão do Instituto Federal do Tocantins (IFTO) que promove a inclusão digital nas comunidades indígenas da Ilha do Bananal.");
+      setNotaComoFunciona("Uma pequena comissão de cada venda é destinada ao Projeto AWIRE DIGITAL para apoiar as atividades de inclusão digital nas aldeias.");
     }
     setLoadingConfig(false);
   };
@@ -87,6 +90,7 @@ const Configuracoes = () => {
     const result = await saveConfiguracoes({
       textoComoFunciona,
       textoSobreProjeto,
+      notaComoFunciona,
     });
     setSavingConfig(false);
     
@@ -409,6 +413,20 @@ const Configuracoes = () => {
                       value={textoSobreProjeto}
                       onChange={(e) => setTextoSobreProjeto(e.target.value)}
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="nota-como-funciona">Nota do "Como Funciona" (Rodapé)</Label>
+                    <Textarea
+                      id="nota-como-funciona"
+                      rows={3}
+                      className="bg-background"
+                      placeholder="Ex: Uma pequena comissão de cada venda é destinada ao Projeto..."
+                      value={notaComoFunciona}
+                      onChange={(e) => setNotaComoFunciona(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Este texto aparece na caixa verde abaixo dos passos do "Como funciona".
+                    </p>
                   </div>
                   <Button 
                     type="submit" 

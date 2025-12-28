@@ -456,6 +456,7 @@ export const deleteFoto = async (id: string, legenda?: string) => {
 export interface Configuracoes {
   textoComoFunciona: string;
   textoSobreProjeto: string;
+  notaComoFunciona?: string;
 }
 
 export const getConfiguracoes = async (): Promise<Configuracoes | null> => {

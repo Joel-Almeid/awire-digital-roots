@@ -44,6 +44,9 @@ const Artesanato = () => {
   const [aldeias, setAldeias] = useState<Aldeia[]>([]);
   const [artesaos, setArtesaos] = useState<Artesao[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Configurações dinâmicas
+  const [notaComoFunciona, setNotaComoFunciona] = useState<string>("");
 
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1,
@@ -56,11 +59,12 @@ const Artesanato = () => {
 
     const loadInitialData = async () => {
       setLoading(true);
-      const [result, categoriasData, aldeiasData, artesaosData] = await Promise.all([
+      const [result, categoriasData, aldeiasData, artesaosData, configData] = await Promise.all([
         getArtesanatosPaginated(ITEMS_PER_PAGE),
         getCategorias(),
         getAldeias(),
-        getArtesaos()
+        getArtesaos(),
+        getConfiguracoes()
       ]);
       
       if (!isMounted) return;
@@ -71,6 +75,12 @@ const Artesanato = () => {
       setCategorias(categoriasData);
       setAldeias(aldeiasData);
       setArtesaos(artesaosData.filter(a => a.ativo !== false));
+      
+      // Carregar nota do como funciona
+      if (configData?.notaComoFunciona) {
+        setNotaComoFunciona(configData.notaComoFunciona);
+      }
+      
       setLoading(false);
     };
     
@@ -174,7 +184,7 @@ const Artesanato = () => {
             </ol>
             <div className="mt-6 p-4 bg-primary/10 rounded-lg">
               <p className="text-sm text-foreground text-center">
-                <strong>Nota:</strong> Uma pequena comissão de cada venda é destinada ao Projeto AWIRE DIGITAL para apoiar as atividades de inclusão digital nas aldeias.
+                <strong>Nota:</strong> {notaComoFunciona || "Uma pequena comissão de cada venda é destinada ao Projeto AWIRE DIGITAL para apoiar as atividades de inclusão digital nas aldeias."}
               </p>
             </div>
           </Card>
