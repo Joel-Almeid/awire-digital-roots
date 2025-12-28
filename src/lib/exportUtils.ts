@@ -120,11 +120,11 @@ export const exportToPDF = async ({ title, filename, columns, data }: PDFExportO
   doc.setFont('helvetica', 'bold');
   doc.text('PROJETO DE EXTENSÃO AWIRE DIGITAL', pageWidth / 2, 54, { align: 'center' });
   
-  // Report title
+  // Report title - moved down with more spacing
   doc.setFontSize(12);
-  doc.text(title, pageWidth / 2, 70, { align: 'center' });
+  doc.text(title, pageWidth / 2, 72, { align: 'center' });
   
-  // Date
+  // Date - with proper spacing below title
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   const currentDate = new Date().toLocaleDateString('pt-BR', {
@@ -132,15 +132,15 @@ export const exportToPDF = async ({ title, filename, columns, data }: PDFExportO
     month: 'long',
     year: 'numeric'
   });
-  doc.text(`Data de Geração: ${currentDate}`, pageWidth / 2, 72, { align: 'center' });
+  doc.text(`Data de Geração: ${currentDate}`, pageWidth / 2, 80, { align: 'center' });
   
-  // Table
+  // Table - adjusted startY to accommodate header spacing
   const tableData = data.map(item => columns.map(col => item[col.key] ?? '-'));
   
   autoTable(doc, {
     head: [columns.map(col => col.label)],
     body: tableData,
-    startY: 80,
+    startY: 90,
     styles: {
       fontSize: 9,
       cellPadding: 3,
