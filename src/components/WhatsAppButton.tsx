@@ -2,13 +2,28 @@
 
 import { FaWhatsapp } from "react-icons/fa";
 
-const WhatsAppButton = () => {
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
 
+const WhatsAppButton = () => {
   const defaultMessage = encodeURIComponent(
     "Olá! Visitei o site Awire Digital e gostaria de mais informações."
   );
 
   const whatsappLink = `https://wa.me/5563992747396?text=${defaultMessage}`;
+
+  const handleClick = () => {
+    // Google Analytics event
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'click_whatsapp', {
+        event_category: 'engagement',
+        event_label: 'WhatsApp Button Click'
+      });
+    }
+  };
 
   return (
     <a
@@ -16,7 +31,7 @@ const WhatsAppButton = () => {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contato WhatsApp AWIRE DIGITAL"
-      
+      onClick={handleClick}
       className="
         fixed bottom-8 right-8 z-50
         w-20 h-20        
@@ -25,7 +40,7 @@ const WhatsAppButton = () => {
         shadow-lg hover-lift hover:bg-green-700 transition-all
       "
     >
-      <FaWhatsapp className="w-14 h-14 text-black" />   {/* 🔥 ícone maior */}
+      <FaWhatsapp className="w-14 h-14 text-black" />
     </a>
   );
 };

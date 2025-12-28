@@ -460,7 +460,7 @@ const Index = () => {
             Você pode contribuir para o fortalecimento da inclusão digital e valorização da cultura indígena. Seja voluntário ou apoie nosso projeto!
           </p>
           <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-            <a href="https://wa.me/5563992747396" target="_blank" rel="noopener noreferrer">
+            <a href="https://wa.me/5563992747396?text=Ol%C3%A1%2C%20tudo%20bem%3F%20Tenho%20interesse%20em%20me%20voluntariar%20no%20projeto%20Awire%20Digital%20e%20gostaria%20de%20saber%20como%20posso%20fazer%20parte%20dessa%20iniciativa!" target="_blank" rel="noopener noreferrer">
               Quero ser voluntário <ArrowRight className="ml-2 h-5 w-5" />
             </a>
           </Button>

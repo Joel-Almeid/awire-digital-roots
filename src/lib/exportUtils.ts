@@ -1,6 +1,11 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+// Import logos as base64 - we'll load them dynamically
+import awireLogoPdf from '@/assets/awire-logo-pdf.png';
+import iftoLogoPdf from '@/assets/ifto-logo-pdf.png';
+import brasaoPdf from '@/assets/brasao-pdf.png';
+
 // ===== CSV EXPORT =====
 
 export const exportToCSV = (data: Record<string, any>[], filename: string, columns: { key: string; label: string }[]) => {
@@ -42,34 +47,81 @@ interface PDFExportOptions {
   data: Record<string, any>[];
 }
 
-export const exportToPDF = ({ title, filename, columns, data }: PDFExportOptions) => {
+// Helper function to load image as base64
+const loadImageAsBase64 = (src: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } else {
+        reject(new Error('Could not get canvas context'));
+      }
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+};
+
+export const exportToPDF = async ({ title, filename, columns, data }: PDFExportOptions) => {
   const doc = new jsPDF();
   
   // Institutional Header
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  // Header background
+  // Header background - increased height for logos
   doc.setFillColor(10, 47, 37); // Green dark (#0a2f25)
-  doc.rect(0, 0, pageWidth, 45, 'F');
+  doc.rect(0, 0, pageWidth, 55, 'F');
   
-  // Ministry text
+  try {
+    // Load and add logos
+    const [awireLogo, iftoLogo, brasaoLogo] = await Promise.all([
+      loadImageAsBase64(awireLogoPdf),
+      loadImageAsBase64(iftoLogoPdf),
+      loadImageAsBase64(brasaoPdf)
+    ]);
+    
+    // Add logos - positioned horizontally
+    const logoHeight = 18;
+    const logoY = 5;
+    
+    // Awire logo (left)
+    doc.addImage(awireLogo, 'PNG', 15, logoY, 20, logoHeight);
+    
+    // IFTO logo (center-left)
+    doc.addImage(iftoLogo, 'PNG', 40, logoY, 15, logoHeight);
+    
+    // Brasão (right)
+    doc.addImage(brasaoLogo, 'PNG', pageWidth - 35, logoY, 20, logoHeight);
+  } catch (error) {
+    console.error('Error loading logos for PDF:', error);
+    // Continue without logos if they fail to load
+  }
+  
+  // Ministry text - positioned below logos
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(8);
-  doc.text('MINISTÉRIO DA EDUCAÇÃO', pageWidth / 2, 10, { align: 'center' });
-  doc.text('SECRETARIA DE EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA', pageWidth / 2, 14, { align: 'center' });
-  doc.text('INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO TOCANTINS', pageWidth / 2, 18, { align: 'center' });
-  doc.text('CAMPUS FORMOSO DO ARAGUAIA', pageWidth / 2, 22, { align: 'center' });
+  doc.setFontSize(7);
+  doc.text('MINISTÉRIO DA EDUCAÇÃO', pageWidth / 2, 28, { align: 'center' });
+  doc.text('SECRETARIA DE EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA', pageWidth / 2, 32, { align: 'center' });
+  doc.text('INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO TOCANTINS', pageWidth / 2, 36, { align: 'center' });
+  doc.text('CAMPUS FORMOSO DO ARAGUAIA', pageWidth / 2, 40, { align: 'center' });
   
   // Project title
-  doc.setFontSize(14);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('PROJETO DE EXTENSÃO AWIRE DIGITAL', pageWidth / 2, 32, { align: 'center' });
+  doc.text('PROJETO DE EXTENSÃO AWIRE DIGITAL', pageWidth / 2, 48, { align: 'center' });
   
   // Report title
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text(title, pageWidth / 2, 55, { align: 'center' });
+  doc.text(title, pageWidth / 2, 65, { align: 'center' });
   
   // Date
   doc.setFontSize(9);
@@ -79,7 +131,7 @@ export const exportToPDF = ({ title, filename, columns, data }: PDFExportOptions
     month: 'long',
     year: 'numeric'
   });
-  doc.text(`Data de Geração: ${currentDate}`, pageWidth / 2, 62, { align: 'center' });
+  doc.text(`Data de Geração: ${currentDate}`, pageWidth / 2, 72, { align: 'center' });
   
   // Table
   const tableData = data.map(item => columns.map(col => item[col.key] ?? '-'));
@@ -87,7 +139,7 @@ export const exportToPDF = ({ title, filename, columns, data }: PDFExportOptions
   autoTable(doc, {
     head: [columns.map(col => col.label)],
     body: tableData,
-    startY: 70,
+    startY: 80,
     styles: {
       fontSize: 9,
       cellPadding: 3,
@@ -148,7 +200,7 @@ export const exportArtesanatosCSV = (artesanatos: any[]) => {
   exportToCSV(formattedData, 'artesanatos_awire', columns);
 };
 
-export const exportArtesanatosPDF = (artesanatos: any[]) => {
+export const exportArtesanatosPDF = async (artesanatos: any[]) => {
   const columns = [
     { key: 'nome', label: 'Nome' },
     { key: 'categoria', label: 'Categoria' },
@@ -164,7 +216,7 @@ export const exportArtesanatosPDF = (artesanatos: any[]) => {
       : '-'
   }));
   
-  exportToPDF({
+  await exportToPDF({
     title: 'RELATÓRIO DE ARTESANATOS CADASTRADOS',
     filename: 'artesanatos_awire',
     columns,
@@ -180,12 +232,14 @@ export const exportArtesaosCSV = (artesaos: any[]) => {
     { key: 'aldeia', label: 'Aldeia' },
     { key: 'whatsapp', label: 'WhatsApp' },
     { key: 'status', label: 'Status' },
+    { key: 'documentacao', label: 'Documentação' },
     { key: 'dataCriacao', label: 'Data de Registro' },
   ];
   
   const formattedData = artesaos.map(item => ({
     ...item,
     status: item.ativo !== false ? 'Ativo' : 'Inativo',
+    documentacao: item.urlTermoAssinado ? 'OK' : 'Pendente',
     dataCriacao: item.createdAt?.toDate?.()
       ? item.createdAt.toDate().toLocaleDateString('pt-BR')
       : '-'
@@ -194,24 +248,26 @@ export const exportArtesaosCSV = (artesaos: any[]) => {
   exportToCSV(formattedData, 'artesaos_awire', columns);
 };
 
-export const exportArtesaosPDF = (artesaos: any[]) => {
+export const exportArtesaosPDF = async (artesaos: any[]) => {
   const columns = [
     { key: 'nome', label: 'Nome' },
     { key: 'aldeia', label: 'Aldeia' },
     { key: 'whatsapp', label: 'WhatsApp' },
     { key: 'status', label: 'Status' },
+    { key: 'documentacao', label: 'Doc.' },
     { key: 'dataCriacao', label: 'Data' },
   ];
   
   const formattedData = artesaos.map(item => ({
     ...item,
     status: item.ativo !== false ? 'Ativo' : 'Inativo',
+    documentacao: item.urlTermoAssinado ? 'OK' : 'Pendente',
     dataCriacao: item.createdAt?.toDate?.()
       ? item.createdAt.toDate().toLocaleDateString('pt-BR')
       : '-'
   }));
   
-  exportToPDF({
+  await exportToPDF({
     title: 'RELATÓRIO DE ARTESÃOS CADASTRADOS',
     filename: 'artesaos_awire',
     columns,

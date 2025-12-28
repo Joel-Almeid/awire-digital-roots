@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Users, Download, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Download, FileText, Eye, Upload, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { exportArtesaosCSV, exportArtesaosPDF } from "@/lib/exportUtils";
+import { uploadDocumentCloudinary } from "@/lib/cloudinaryUpload";
 import { 
   getArtesaos, 
   addArtesao, 
@@ -27,14 +30,18 @@ const Artesaos = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingTermo, setUploadingTermo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [editingArtesao, setEditingArtesao] = useState<Artesao | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
+  const [selectedTermo, setSelectedTermo] = useState<File | null>(null);
   
   const [formData, setFormData] = useState({
     nome: "",
     whatsapp: "",
     aldeia: "",
-    ativo: true
+    ativo: true,
+    urlTermoAssinado: ""
   });
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
 
@@ -54,10 +61,12 @@ const Artesaos = () => {
   };
 
   const resetForm = () => {
-    setFormData({ nome: "", whatsapp: "", aldeia: "", ativo: true });
+    setFormData({ nome: "", whatsapp: "", aldeia: "", ativo: true, urlTermoAssinado: "" });
     setSelectedPhoto(null);
+    setSelectedTermo(null);
     setExistingPhotoUrl("");
     setEditingArtesao(null);
+    setUploadProgress(0);
   };
 
   const openEditDialog = (artesao: Artesao) => {
@@ -66,11 +75,44 @@ const Artesaos = () => {
       nome: artesao.nome,
       whatsapp: artesao.whatsapp,
       aldeia: artesao.aldeia,
-      ativo: artesao.ativo !== false
+      ativo: artesao.ativo !== false,
+      urlTermoAssinado: artesao.urlTermoAssinado || ""
     });
     setExistingPhotoUrl(artesao.fotoUrl || "");
     setSelectedPhoto(null);
+    setSelectedTermo(null);
     setDialogOpen(true);
+  };
+
+  const handleTermoUpload = async (file: File) => {
+    setUploadingTermo(true);
+    setUploadProgress(0);
+    
+    // Simulate progress for UX
+    const progressInterval = setInterval(() => {
+      setUploadProgress(prev => Math.min(prev + 10, 90));
+    }, 200);
+    
+    const result = await uploadDocumentCloudinary(file, {
+      folder: "awire/termos_artesaos",
+      tags: ["termo_adesao"],
+      maxSize: 10
+    });
+    
+    clearInterval(progressInterval);
+    setUploadProgress(100);
+    
+    if (result.success && result.url) {
+      setFormData(prev => ({ ...prev, urlTermoAssinado: result.url! }));
+      toast.success("Termo de adesão enviado com sucesso!");
+    } else {
+      toast.error(typeof result.error === 'string' ? result.error : "Erro ao enviar o termo.");
+    }
+    
+    setTimeout(() => {
+      setUploadingTermo(false);
+      setUploadProgress(0);
+    }, 500);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,7 +145,8 @@ const Artesaos = () => {
         whatsapp: formData.whatsapp,
         aldeia: formData.aldeia,
         fotoUrl: fotoUrl,
-        ativo: formData.ativo
+        ativo: formData.ativo,
+        urlTermoAssinado: formData.urlTermoAssinado
       };
 
       if (editingArtesao) {
@@ -154,13 +197,23 @@ const Artesaos = () => {
     toast.success("CSV exportado com sucesso!");
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (artesaos.length === 0) {
       toast.error("Não há artesãos para exportar.");
       return;
     }
-    exportArtesaosPDF(artesaos);
+    await exportArtesaosPDF(artesaos);
     toast.success("PDF exportado com sucesso!");
+  };
+
+  const handleDownloadTermo = (url: string, nome: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `termo_adesao_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -202,7 +255,7 @@ const Artesaos = () => {
                     Adicionar Novo Artesão
                   </Button>
                 </DialogTrigger>
-              <DialogContent className="max-w-2xl bg-card">
+              <DialogContent className="max-w-2xl bg-card max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="text-foreground">
                     {editingArtesao ? "Editar Artesão" : "Adicionar Novo Artesão"}
@@ -288,6 +341,69 @@ const Artesaos = () => {
                       </p>
                     )}
                   </div>
+
+                  {/* Termo de Adesão Section */}
+                  <div className="border-t border-border pt-4">
+                    <Label htmlFor="termo" className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Termo de Adesão Assinado
+                    </Label>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Formatos aceitos: PDF, JPG, PNG (máx. 10MB)
+                    </p>
+                    
+                    {formData.urlTermoAssinado ? (
+                      <div className="flex items-center gap-4 mt-2 p-3 bg-green-medium/10 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-light" />
+                        <span className="text-sm text-foreground flex-1">Termo anexado</span>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(formData.urlTermoAssinado, '_blank')}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFormData({...formData, urlTermoAssinado: ""})}
+                          >
+                            Trocar
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Input 
+                          id="termo" 
+                          type="file" 
+                          accept=".pdf,.jpg,.jpeg,.png" 
+                          className="bg-background"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setSelectedTermo(file);
+                              handleTermoUpload(file);
+                            }
+                          }}
+                          disabled={uploadingTermo}
+                        />
+                        {uploadingTermo && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                              <span className="text-sm text-muted-foreground">Enviando termo...</span>
+                            </div>
+                            <Progress value={uploadProgress} className="h-2" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex items-center justify-between">
                     <Label htmlFor="status">Status Ativo</Label>
                     <Switch 
@@ -299,7 +415,7 @@ const Artesaos = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-gold hover:bg-gold/90 text-green-dark font-semibold"
-                    disabled={uploading}
+                    disabled={uploading || uploadingTermo}
                   >
                     {uploading ? "Salvando..." : editingArtesao ? "Atualizar Artesão" : "Salvar Artesão"}
                   </Button>
@@ -343,12 +459,53 @@ const Artesaos = () => {
                       <p className="text-xs text-muted-foreground">{artesao.whatsapp}</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-muted-foreground">Status:</span>
                     <span className={`text-sm font-medium ${artesao.ativo !== false ? 'text-green-light' : 'text-destructive'}`}>
                       {artesao.ativo !== false ? 'Ativo' : 'Inativo'}
                     </span>
                   </div>
+                  
+                  {/* Documentação Status */}
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm text-muted-foreground">Documentação:</span>
+                    {artesao.urlTermoAssinado ? (
+                      <Badge className="bg-green-light/20 text-green-light border-green-light/30">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        OK
+                      </Badge>
+                    ) : (
+                      <Badge variant="destructive" className="bg-destructive/20 text-destructive border-destructive/30">
+                        <XCircle className="w-3 h-3 mr-1" />
+                        Pendente
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Document Actions */}
+                  {artesao.urlTermoAssinado && (
+                    <div className="flex gap-2 mb-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-border/20"
+                        onClick={() => window.open(artesao.urlTermoAssinado, '_blank')}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Ver Termo
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-border/20"
+                        onClick={() => handleDownloadTermo(artesao.urlTermoAssinado!, artesao.nome)}
+                      >
+                        <Download className="w-3 h-3 mr-1" />
+                        Baixar
+                      </Button>
+                    </div>
+                  )}
+
                   <div className="flex gap-2">
                     <Button 
                       variant="outline" 
