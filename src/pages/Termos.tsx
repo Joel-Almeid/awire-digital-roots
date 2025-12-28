@@ -1,8 +1,10 @@
+import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
-import { FileText, Scale, ShieldAlert, Copyright, Gavel } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileText, Scale, ShieldAlert, Copyright, Gavel, ArrowLeft } from "lucide-react";
 
 const Termos = () => {
   return (
@@ -15,9 +17,19 @@ const Termos = () => {
       <Navigation />
 
       <main className="min-h-screen bg-background pt-20">
-        <div className="container mx-auto px-4 lg:px-8 py-12">
+        <div className="container mx-auto px-4 lg:px-8 py-12 animate-fade-in">
+          {/* Back Button */}
+          <div className="mb-8">
+            <Button asChild variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Link to="/">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Ir para a Página Inicial
+              </Link>
+            </Button>
+          </div>
+
           {/* Header */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-12 animate-fade-in" style={{ animationDelay: "0.1s" }}>
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/20 mb-4">
               <FileText className="w-8 h-8 text-primary" />
             </div>

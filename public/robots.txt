@@ -12,3 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /login
+
+Sitemap: https://awiredigital.com.br/sitemap.xml
+Allow: /

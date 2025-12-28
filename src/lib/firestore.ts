@@ -41,6 +41,7 @@ export interface Artesao {
   aldeia: string;
   bio?: string;
   ativo: boolean;
+  urlTermoAssinado?: string;
   createdAt: Timestamp;
 }
 
