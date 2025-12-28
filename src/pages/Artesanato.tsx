@@ -101,9 +101,13 @@ const Artesanato = () => {
     }
   }, [inView, hasMore, loadingMore, loading, loadMore]);
 
-  // Filtrar os crafts localmente
+  // Filtrar os crafts localmente - inclui busca por título, descrição E nome do artesão
   const filteredCrafts = crafts.filter((craft) => {
-    const matchesSearch = craft.nome.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = searchQuery === "" || 
+      craft.nome.toLowerCase().includes(searchLower) ||
+      craft.descricao.toLowerCase().includes(searchLower) ||
+      (craft.artesaoNome && craft.artesaoNome.toLowerCase().includes(searchLower));
     const matchesCategory = categoryFilter === "todas" || craft.categoria === categoryFilter;
     const matchesAldeia = aldeiaFilter === "todas" || craft.aldeia === aldeiaFilter;
     const matchesArtesao = artesaoFilter === "todos" || craft.artesaoId === artesaoFilter;

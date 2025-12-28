@@ -75,53 +75,54 @@ export const exportToPDF = async ({ title, filename, columns, data }: PDFExportO
   // Institutional Header
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  // Header background - increased height for logos
-  doc.setFillColor(10, 47, 37); // Green dark (#0a2f25)
-  doc.rect(0, 0, pageWidth, 55, 'F');
+  // White background with header bar
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, 0, pageWidth, 297, 'F');
+  
+  // Header bar - light gray
+  doc.setFillColor(240, 240, 240);
+  doc.rect(0, 0, pageWidth, 60, 'F');
   
   try {
-    // Load and add logos
+    // Load and add logos - bigger sizes
     const [awireLogo, iftoLogo, brasaoLogo] = await Promise.all([
       loadImageAsBase64(awireLogoPdf),
       loadImageAsBase64(iftoLogoPdf),
       loadImageAsBase64(brasaoPdf)
     ]);
     
-    // Add logos - positioned horizontally
-    const logoHeight = 18;
+    // Add logos - positioned horizontally with larger sizes
+    const logoHeight = 25;
     const logoY = 5;
     
     // Awire logo (left)
-    doc.addImage(awireLogo, 'PNG', 15, logoY, 20, logoHeight);
+    doc.addImage(awireLogo, 'PNG', 15, logoY, 28, logoHeight);
     
     // IFTO logo (center-left)
-    doc.addImage(iftoLogo, 'PNG', 40, logoY, 15, logoHeight);
+    doc.addImage(iftoLogo, 'PNG', 48, logoY, 22, logoHeight);
     
     // Brasão (right)
-    doc.addImage(brasaoLogo, 'PNG', pageWidth - 35, logoY, 20, logoHeight);
+    doc.addImage(brasaoLogo, 'PNG', pageWidth - 40, logoY, 25, logoHeight);
   } catch (error) {
     console.error('Error loading logos for PDF:', error);
-    // Continue without logos if they fail to load
   }
   
-  // Ministry text - positioned below logos
-  doc.setTextColor(255, 255, 255);
+  // Ministry text - black text below logos
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(7);
-  doc.text('MINISTÉRIO DA EDUCAÇÃO', pageWidth / 2, 28, { align: 'center' });
-  doc.text('SECRETARIA DE EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA', pageWidth / 2, 32, { align: 'center' });
-  doc.text('INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO TOCANTINS', pageWidth / 2, 36, { align: 'center' });
-  doc.text('CAMPUS FORMOSO DO ARAGUAIA', pageWidth / 2, 40, { align: 'center' });
+  doc.text('MINISTÉRIO DA EDUCAÇÃO', pageWidth / 2, 34, { align: 'center' });
+  doc.text('SECRETARIA DE EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA', pageWidth / 2, 38, { align: 'center' });
+  doc.text('INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO TOCANTINS', pageWidth / 2, 42, { align: 'center' });
+  doc.text('CAMPUS FORMOSO DO ARAGUAIA', pageWidth / 2, 46, { align: 'center' });
   
   // Project title
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('PROJETO DE EXTENSÃO AWIRE DIGITAL', pageWidth / 2, 48, { align: 'center' });
+  doc.text('PROJETO DE EXTENSÃO AWIRE DIGITAL', pageWidth / 2, 54, { align: 'center' });
   
   // Report title
-  doc.setTextColor(0, 0, 0);
   doc.setFontSize(12);
-  doc.setFont('helvetica', 'bold');
-  doc.text(title, pageWidth / 2, 65, { align: 'center' });
+  doc.text(title, pageWidth / 2, 70, { align: 'center' });
   
   // Date
   doc.setFontSize(9);

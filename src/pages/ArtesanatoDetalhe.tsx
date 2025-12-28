@@ -102,6 +102,32 @@ const ArtesanatoDetalhe = () => {
   const pageDescription = product.descricao.substring(0, 160);
   const pageImage = validImages[0] || "";
 
+  // Schema.org JSON-LD para o produto (Dados Estruturados)
+  const schemaData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.nome,
+    "description": product.descricao,
+    "image": validImages,
+    "brand": {
+      "@type": "Brand",
+      "name": "Awire Digital"
+    },
+    "manufacturer": {
+      "@type": "Person",
+      "name": artesao?.nome || product.artesaoNome,
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": product.aldeia,
+        "addressRegion": "Tocantins",
+        "addressCountry": "BR"
+      }
+    },
+    "category": product.categoria,
+    "countryOfOrigin": "BR",
+    "isHandmade": true
+  };
+
   return (
     <div className="min-h-screen">
       <Helmet>
@@ -115,6 +141,9 @@ const ArtesanatoDetalhe = () => {
         <meta name="twitter:title" content={pageTitle} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={pageImage} />
+        <script type="application/ld+json">
+          {JSON.stringify(schemaData)}
+        </script>
       </Helmet>
 
       <Navigation />
