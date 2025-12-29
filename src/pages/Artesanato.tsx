@@ -47,6 +47,11 @@ const Artesanato = () => {
   
   // Configurações dinâmicas
   const [notaComoFunciona, setNotaComoFunciona] = useState<string>("");
+  const [passo1, setPasso1] = useState<string>("Navegue pela galeria e escolha as peças que mais lhe interessam");
+  const [passo2, setPasso2] = useState<string>("Clique em \"Ver Detalhes\" para conhecer mais sobre a peça e o artesão");
+  const [passo3, setPasso3] = useState<string>("Use o botão \"Falar com o Artesão\" para entrar em contato via WhatsApp");
+  const [passo4, setPasso4] = useState<string>("Negocie preço, frete e forma de pagamento diretamente com o artesão");
+  const [passo5, setPasso5] = useState<string>("Receba sua peça exclusiva e autêntica em casa!");
 
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1,
@@ -76,9 +81,16 @@ const Artesanato = () => {
       setAldeias(aldeiasData);
       setArtesaos(artesaosData.filter(a => a.ativo !== false));
       
-      // Carregar nota do como funciona
-      if (configData?.notaComoFunciona) {
-        setNotaComoFunciona(configData.notaComoFunciona);
+      // Carregar nota do como funciona e passos
+      if (configData) {
+        if (configData.notaComoFunciona) {
+          setNotaComoFunciona(configData.notaComoFunciona);
+        }
+        if (configData.passo1) setPasso1(configData.passo1);
+        if (configData.passo2) setPasso2(configData.passo2);
+        if (configData.passo3) setPasso3(configData.passo3);
+        if (configData.passo4) setPasso4(configData.passo4);
+        if (configData.passo5) setPasso5(configData.passo5);
       }
       
       setLoading(false);
@@ -163,23 +175,23 @@ const Artesanato = () => {
             <ol className="space-y-4 max-w-2xl mx-auto">
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</span>
-                <p className="text-muted-foreground">Navegue pela galeria e escolha as peças que mais lhe interessam</p>
+                <p className="text-muted-foreground">{passo1}</p>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</span>
-                <p className="text-muted-foreground">Clique em "Ver Detalhes" para conhecer mais sobre a peça e o artesão</p>
+                <p className="text-muted-foreground">{passo2}</p>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</span>
-                <p className="text-muted-foreground">Use o botão "Falar com o Artesão" para entrar em contato via WhatsApp</p>
+                <p className="text-muted-foreground">{passo3}</p>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">4</span>
-                <p className="text-muted-foreground">Negocie preço, frete e forma de pagamento diretamente com o artesão</p>
+                <p className="text-muted-foreground">{passo4}</p>
               </li>
               <li className="flex gap-4">
                 <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">5</span>
-                <p className="text-muted-foreground">Receba sua peça exclusiva e autêntica em casa!</p>
+                <p className="text-muted-foreground">{passo5}</p>
               </li>
             </ol>
             <div className="mt-6 p-4 bg-primary/10 rounded-lg">

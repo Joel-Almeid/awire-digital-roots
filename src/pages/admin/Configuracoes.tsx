@@ -29,6 +29,11 @@ const Configuracoes = () => {
   const [textoComoFunciona, setTextoComoFunciona] = useState("");
   const [textoSobreProjeto, setTextoSobreProjeto] = useState("");
   const [notaComoFunciona, setNotaComoFunciona] = useState("");
+  const [passo1, setPasso1] = useState("");
+  const [passo2, setPasso2] = useState("");
+  const [passo3, setPasso3] = useState("");
+  const [passo4, setPasso4] = useState("");
+  const [passo5, setPasso5] = useState("");
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(true);
 
@@ -60,11 +65,21 @@ const Configuracoes = () => {
       setTextoComoFunciona(config.textoComoFunciona);
       setTextoSobreProjeto(config.textoSobreProjeto);
       setNotaComoFunciona(config.notaComoFunciona || "");
+      setPasso1(config.passo1 || "Navegue pela galeria e escolha as peças que mais lhe interessam");
+      setPasso2(config.passo2 || "Clique em \"Ver Detalhes\" para conhecer mais sobre a peça e o artesão");
+      setPasso3(config.passo3 || "Use o botão \"Falar com o Artesão\" para entrar em contato via WhatsApp");
+      setPasso4(config.passo4 || "Negocie preço, frete e forma de pagamento diretamente com o artesão");
+      setPasso5(config.passo5 || "Receba sua peça exclusiva e autêntica em casa!");
     } else {
       // Valores padrão
       setTextoComoFunciona("1. Navegue pela galeria e escolha as peças que mais lhe agradam\n2. Clique no botão 'Ver Detalhes' para conhecer mais sobre o produto\n3. Entre em contato diretamente com o artesão via WhatsApp\n4. Negocie valores, formas de pagamento e entrega\n5. Receba sua peça única, feita com tradição e carinho");
       setTextoSobreProjeto("O projeto de extensão do Instituto Federal do Tocantins (IFTO) que promove a inclusão digital nas comunidades indígenas da Ilha do Bananal.");
       setNotaComoFunciona("Uma pequena comissão de cada venda é destinada ao Projeto AWIRE DIGITAL para apoiar as atividades de inclusão digital nas aldeias.");
+      setPasso1("Navegue pela galeria e escolha as peças que mais lhe interessam");
+      setPasso2("Clique em \"Ver Detalhes\" para conhecer mais sobre a peça e o artesão");
+      setPasso3("Use o botão \"Falar com o Artesão\" para entrar em contato via WhatsApp");
+      setPasso4("Negocie preço, frete e forma de pagamento diretamente com o artesão");
+      setPasso5("Receba sua peça exclusiva e autêntica em casa!");
     }
     setLoadingConfig(false);
   };
@@ -91,6 +106,11 @@ const Configuracoes = () => {
       textoComoFunciona,
       textoSobreProjeto,
       notaComoFunciona,
+      passo1,
+      passo2,
+      passo3,
+      passo4,
+      passo5,
     });
     setSavingConfig(false);
     
@@ -428,6 +448,59 @@ const Configuracoes = () => {
                       Este texto aparece na caixa verde abaixo dos passos do "Como funciona".
                     </p>
                   </div>
+                  
+                  {/* Passos do Como Funciona */}
+                  <div className="border-t border-border pt-4">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Passos do "Como Funciona"</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="passo1">Passo 1</Label>
+                        <Input
+                          id="passo1"
+                          className="bg-background"
+                          value={passo1}
+                          onChange={(e) => setPasso1(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="passo2">Passo 2</Label>
+                        <Input
+                          id="passo2"
+                          className="bg-background"
+                          value={passo2}
+                          onChange={(e) => setPasso2(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="passo3">Passo 3</Label>
+                        <Input
+                          id="passo3"
+                          className="bg-background"
+                          value={passo3}
+                          onChange={(e) => setPasso3(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="passo4">Passo 4</Label>
+                        <Input
+                          id="passo4"
+                          className="bg-background"
+                          value={passo4}
+                          onChange={(e) => setPasso4(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="passo5">Passo 5</Label>
+                        <Input
+                          id="passo5"
+                          className="bg-background"
+                          value={passo5}
+                          onChange={(e) => setPasso5(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <Button 
                     type="submit" 
                     className="bg-gold hover:bg-gold/90 text-green-dark font-semibold"

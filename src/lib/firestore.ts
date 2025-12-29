@@ -457,6 +457,11 @@ export interface Configuracoes {
   textoComoFunciona: string;
   textoSobreProjeto: string;
   notaComoFunciona?: string;
+  passo1?: string;
+  passo2?: string;
+  passo3?: string;
+  passo4?: string;
+  passo5?: string;
 }
 
 export const getConfiguracoes = async (): Promise<Configuracoes | null> => {

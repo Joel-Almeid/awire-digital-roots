@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import logoAwire from "@/assets/logo-awire.png";
+const logoAwire = "/logo_awiredigital.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");

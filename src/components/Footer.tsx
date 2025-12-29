@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Mail, MapPin } from "lucide-react";
-import logoAwire from "@/assets/logo-awire.png";
+import { Instagram, Mail, MapPin } from "lucide-react";
+const logoAwire = "/logo_awiredigital.png";
 import logoIfto from "@/assets/logo-ifto.png";
 import logoNEABI from "@/assets/logo-neabi.png";
 
@@ -78,11 +78,13 @@ const Footer = () => {
                 <span className="text-sm text-muted-foreground">Ilha do Bananal, Tocantins</span>
               </li>
               <li className="flex items-center gap-3 mt-4">
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <a 
+                  href="https://www.instagram.com/ifto.formoso?igsh=ZW1sNGdhYmt5bmFz" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                >
                   <Instagram className="h-5 w-5" />
-                </a>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  <Facebook className="h-5 w-5" />
                 </a>
               </li>
             </ul>

@@ -246,9 +246,19 @@ const Artesaos = () => {
   };
 
   const handleDownloadTermo = (url: string, nome: string) => {
+    // Add fl_attachment parameter to Cloudinary URL to force download
+    let downloadUrl = url;
+    if (url.includes('cloudinary.com')) {
+      // Insert fl_attachment before the file name
+      const urlParts = url.split('/upload/');
+      if (urlParts.length === 2) {
+        downloadUrl = `${urlParts[0]}/upload/fl_attachment/${urlParts[1]}`;
+      }
+    }
+    
     const link = document.createElement('a');
-    link.href = url;
-    link.download = `termo_adesao_${nome.replace(/\s+/g, '_').toLowerCase()}.pdf`;
+    link.href = downloadUrl;
+    link.download = `termo_adesao_${nome.replace(/\s+/g, '_').toLowerCase()}`;
     link.target = '_blank';
     document.body.appendChild(link);
     link.click();
