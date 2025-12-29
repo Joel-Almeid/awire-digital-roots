@@ -1,7 +1,7 @@
 import { Home, Package, Users, Image, Settings, LogOut, BarChart3 } from "lucide-react";
 import { NavLink } from "./NavLink";
 import { useAuth } from "@/contexts/AuthContext";
-import logoAwire from "@/assets/logo-awire.png";
+const logoAwire = "/logo_awiredigital.png";
 
 export const AdminSidebar = () => {
   const { logout } = useAuth();
@@ -18,7 +18,7 @@ export const AdminSidebar = () => {
   return (
     <aside className="w-64 bg-green-dark border-r border-border/10 min-h-screen flex flex-col">
       <div className="p-6 border-b border-border/10">
-        <img src={logoAwire} alt="AWIRE DIGITAL" className="h-12 w-auto mb-2" />
+        <img src={logoAwire} alt="AWIRE DIGITAL" className="w-40 h-auto mb-2" />
         <h2 className="text-sm text-muted-foreground">Painel Admin</h2>
       </div>
 

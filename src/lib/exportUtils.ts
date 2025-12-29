@@ -75,13 +75,13 @@ export const exportToPDF = async ({ title, filename, columns, data }: PDFExportO
   // Institutional Header
   const pageWidth = doc.internal.pageSize.getWidth();
   
-  // White background with header bar
+  // White background
   doc.setFillColor(255, 255, 255);
   doc.rect(0, 0, pageWidth, 297, 'F');
   
   // Header bar - light gray
-  doc.setFillColor(240, 240, 240);
-  doc.rect(0, 0, pageWidth, 60, 'F');
+  doc.setFillColor(248, 248, 248);
+  doc.rect(0, 0, pageWidth, 75, 'F');
   
   try {
     // Load and add logos - bigger sizes
@@ -92,37 +92,43 @@ export const exportToPDF = async ({ title, filename, columns, data }: PDFExportO
     ]);
     
     // Add logos - positioned horizontally with larger sizes
-    const logoHeight = 25;
-    const logoY = 5;
+    const logoHeight = 22;
+    const logoY = 8;
     
     // Awire logo (left)
-    doc.addImage(awireLogo, 'PNG', 15, logoY, 28, logoHeight);
+    doc.addImage(awireLogo, 'PNG', 15, logoY, 25, logoHeight);
     
     // IFTO logo (center-left)
-    doc.addImage(iftoLogo, 'PNG', 48, logoY, 22, logoHeight);
+    doc.addImage(iftoLogo, 'PNG', 50, logoY, 20, logoHeight);
     
     // Brasão (right)
-    doc.addImage(brasaoLogo, 'PNG', pageWidth - 40, logoY, 25, logoHeight);
+    doc.addImage(brasaoLogo, 'PNG', pageWidth - 38, logoY, 23, logoHeight);
   } catch (error) {
     console.error('Error loading logos for PDF:', error);
   }
   
-  // Ministry text - black text below logos
-  doc.setTextColor(0, 0, 0);
+  // Ministry text - positioned below logos with proper spacing
+  const textStartY = 35;
+  doc.setTextColor(139, 0, 0); // Dark red for ministry text
   doc.setFontSize(7);
-  doc.text('MINISTÉRIO DA EDUCAÇÃO', pageWidth / 2, 34, { align: 'center' });
-  doc.text('SECRETARIA DE EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA', pageWidth / 2, 38, { align: 'center' });
-  doc.text('INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO TOCANTINS', pageWidth / 2, 42, { align: 'center' });
-  doc.text('CAMPUS FORMOSO DO ARAGUAIA', pageWidth / 2, 46, { align: 'center' });
+  doc.text('MINISTÉRIO DA EDUCAÇÃO', pageWidth / 2, textStartY, { align: 'center' });
+  doc.text('SECRETARIA DE EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA', pageWidth / 2, textStartY + 4, { align: 'center' });
+  doc.text('INSTITUTO FEDERAL DE EDUCAÇÃO, CIÊNCIA E TECNOLOGIA DO TOCANTINS', pageWidth / 2, textStartY + 8, { align: 'center' });
+  doc.text('CAMPUS FORMOSO DO ARAGUAIA', pageWidth / 2, textStartY + 12, { align: 'center' });
   
-  // Project title
+  // Project title - with more spacing
+  doc.setTextColor(0, 0, 0);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
-  doc.text('PROJETO DE EXTENSÃO AWIRE DIGITAL', pageWidth / 2, 54, { align: 'center' });
+  doc.text('PROJETO DE EXTENSÃO AWIRE DIGITAL', pageWidth / 2, textStartY + 22, { align: 'center' });
+  
+  // Separator line
+  doc.setDrawColor(200, 200, 200);
+  doc.line(15, 68, pageWidth - 15, 68);
   
   // Report title - moved down with more spacing
   doc.setFontSize(12);
-  doc.text(title, pageWidth / 2, 72, { align: 'center' });
+  doc.text(title, pageWidth / 2, 82, { align: 'center' });
   
   // Date - with proper spacing below title
   doc.setFontSize(9);
@@ -132,7 +138,7 @@ export const exportToPDF = async ({ title, filename, columns, data }: PDFExportO
     month: 'long',
     year: 'numeric'
   });
-  doc.text(`Data de Geração: ${currentDate}`, pageWidth / 2, 80, { align: 'center' });
+  doc.text(`Data de Geração: ${currentDate}`, pageWidth / 2, 90, { align: 'center' });
   
   // Table - adjusted startY to accommodate header spacing
   const tableData = data.map(item => columns.map(col => item[col.key] ?? '-'));
@@ -140,7 +146,7 @@ export const exportToPDF = async ({ title, filename, columns, data }: PDFExportO
   autoTable(doc, {
     head: [columns.map(col => col.label)],
     body: tableData,
-    startY: 90,
+    startY: 100,
     styles: {
       fontSize: 9,
       cellPadding: 3,
