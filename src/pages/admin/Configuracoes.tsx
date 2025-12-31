@@ -26,7 +26,6 @@ const Configuracoes = () => {
   const { toast } = useToast();
   
   // Estados para configurações
-  const [textoComoFunciona, setTextoComoFunciona] = useState("");
   const [textoSobreProjeto, setTextoSobreProjeto] = useState("");
   const [notaComoFunciona, setNotaComoFunciona] = useState("");
   const [passo1, setPasso1] = useState("");
@@ -62,7 +61,6 @@ const Configuracoes = () => {
     setLoadingConfig(true);
     const config = await getConfiguracoes();
     if (config) {
-      setTextoComoFunciona(config.textoComoFunciona);
       setTextoSobreProjeto(config.textoSobreProjeto);
       setNotaComoFunciona(config.notaComoFunciona || "");
       setPasso1(config.passo1 || "Navegue pela galeria e escolha as peças que mais lhe interessam");
@@ -72,7 +70,6 @@ const Configuracoes = () => {
       setPasso5(config.passo5 || "Receba sua peça exclusiva e autêntica em casa!");
     } else {
       // Valores padrão
-      setTextoComoFunciona("1. Navegue pela galeria e escolha as peças que mais lhe agradam\n2. Clique no botão 'Ver Detalhes' para conhecer mais sobre o produto\n3. Entre em contato diretamente com o artesão via WhatsApp\n4. Negocie valores, formas de pagamento e entrega\n5. Receba sua peça única, feita com tradição e carinho");
       setTextoSobreProjeto("O projeto de extensão do Instituto Federal do Tocantins (IFTO) que promove a inclusão digital nas comunidades indígenas da Ilha do Bananal.");
       setNotaComoFunciona("Uma pequena comissão de cada venda é destinada ao Projeto AWIRE DIGITAL para apoiar as atividades de inclusão digital nas aldeias.");
       setPasso1("Navegue pela galeria e escolha as peças que mais lhe interessam");
@@ -102,6 +99,13 @@ const Configuracoes = () => {
   const handleSaveConfiguracoes = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingConfig(true);
+
+    // Mantido para compatibilidade com dados legados no Firestore,
+    // mas agora é gerado automaticamente a partir dos passos 1–5.
+    const textoComoFunciona = [passo1, passo2, passo3, passo4, passo5]
+      .map((p, idx) => `${idx + 1}. ${p}`)
+      .join("\n");
+
     const result = await saveConfiguracoes({
       textoComoFunciona,
       textoSobreProjeto,
@@ -113,7 +117,7 @@ const Configuracoes = () => {
       passo5,
     });
     setSavingConfig(false);
-    
+
     if (result.success) {
       toast({ title: "Sucesso", description: "Configurações salvas com sucesso!" });
     } else {
@@ -414,16 +418,6 @@ const Configuracoes = () => {
                 </div>
               ) : (
                 <form className="space-y-4" onSubmit={handleSaveConfiguracoes}>
-                  <div>
-                    <Label htmlFor="how-it-works">Texto "Como funciona?"</Label>
-                    <Textarea
-                      id="how-it-works"
-                      rows={6}
-                      className="bg-background"
-                      value={textoComoFunciona}
-                      onChange={(e) => setTextoComoFunciona(e.target.value)}
-                    />
-                  </div>
                   <div>
                     <Label htmlFor="about-text">Texto "Sobre o Projeto"</Label>
                     <Textarea
