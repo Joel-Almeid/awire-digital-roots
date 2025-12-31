@@ -245,21 +245,18 @@ const Artesaos = () => {
     toast.success("PDF exportado com sucesso!");
   };
 
+  const getCloudinaryDownloadUrl = (url: string) => {
+    if (!url.includes("cloudinary.com") || !url.includes("/upload/")) return url;
+    if (url.includes("/upload/fl_attachment/")) return url;
+    return url.replace("/upload/", "/upload/fl_attachment/");
+  };
+
   const handleDownloadTermo = (url: string, nome: string) => {
-    // Add fl_attachment parameter to Cloudinary URL to force download
-    let downloadUrl = url;
-    if (url.includes('cloudinary.com')) {
-      // Insert fl_attachment before the file name
-      const urlParts = url.split('/upload/');
-      if (urlParts.length === 2) {
-        downloadUrl = `${urlParts[0]}/upload/fl_attachment/${urlParts[1]}`;
-      }
-    }
-    
-    const link = document.createElement('a');
+    const downloadUrl = getCloudinaryDownloadUrl(url);
+
+    const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = `termo_adesao_${nome.replace(/\s+/g, '_').toLowerCase()}`;
-    link.target = '_blank';
+    link.download = `termo_adesao_${nome.replace(/\s+/g, "_").toLowerCase()}.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -550,13 +547,15 @@ const Artesaos = () => {
                   {artesao.urlTermoAssinado && (
                     <div className="flex gap-2 mb-4">
                       <Button
+                        asChild
                         variant="outline"
                         size="sm"
                         className="flex-1 border-border/20"
-                        onClick={() => window.open(artesao.urlTermoAssinado, '_blank')}
                       >
-                        <Eye className="w-3 h-3 mr-1" />
-                        Ver
+                        <a href={artesao.urlTermoAssinado} target="_blank" rel="noreferrer">
+                          <Eye className="w-3 h-3 mr-1" />
+                          Ver
+                        </a>
                       </Button>
                       <Button
                         variant="outline"
