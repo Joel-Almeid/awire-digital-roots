@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, Heart } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,9 @@ import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import HowToBuyButton from "@/components/HowToBuyButton";
+import VillageTooltip from "@/components/VillageTooltip";
+import { useFavorites } from "@/hooks/useFavorites";
 import { 
   getArtesanatosPaginated, 
   getCategorias, 
@@ -34,6 +37,7 @@ const Artesanato = () => {
   const [categoryFilter, setCategoryFilter] = useState("todas");
   const [aldeiaFilter, setAldeiaFilter] = useState("todas");
   const [artesaoFilter, setArtesaoFilter] = useState("todos");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   
   const [crafts, setCrafts] = useState<ArtesanatoType[]>([]);
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
@@ -44,6 +48,9 @@ const Artesanato = () => {
   const [aldeias, setAldeias] = useState<Aldeia[]>([]);
   const [artesaos, setArtesaos] = useState<Artesao[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Favorites hook
+  const { favorites, toggleFavorite, isFavorite, favoritesCount } = useFavorites();
   
   // Configurações dinâmicas
   const [notaComoFunciona, setNotaComoFunciona] = useState<string>("");
@@ -133,7 +140,8 @@ const Artesanato = () => {
     const matchesCategory = categoryFilter === "todas" || craft.categoria === categoryFilter;
     const matchesAldeia = aldeiaFilter === "todas" || craft.aldeia === aldeiaFilter;
     const matchesArtesao = artesaoFilter === "todos" || craft.artesaoId === artesaoFilter;
-    return matchesSearch && matchesCategory && matchesAldeia && matchesArtesao;
+    const matchesFavorites = !showFavoritesOnly || (craft.id && favorites.includes(craft.id));
+    return matchesSearch && matchesCategory && matchesAldeia && matchesArtesao && matchesFavorites;
   });
 
   return (
@@ -148,6 +156,7 @@ const Artesanato = () => {
 
       <Navigation />
       <WhatsAppButton />
+      <HowToBuyButton />
 
       {/* Hero Section */}
       <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
@@ -212,12 +221,12 @@ const Artesanato = () => {
             </h2>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4 mb-8">
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="text"
-                  placeholder="Buscar por nome..."
+                  placeholder="Buscar por nome ou artesão..."
                   className="pl-10 bg-card"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -261,6 +270,21 @@ const Artesanato = () => {
               </Select>
             </div>
 
+            {/* Favorites Filter */}
+            <div className="flex justify-center mb-8">
+              <Button
+                variant={showFavoritesOnly ? "default" : "outline"}
+                onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                className={showFavoritesOnly 
+                  ? "bg-red-500 hover:bg-red-600 text-white" 
+                  : "border-border/20 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/30"
+                }
+              >
+                <Heart className={`w-4 h-4 mr-2 ${showFavoritesOnly ? 'fill-current' : ''}`} />
+                Meus Favoritos {favoritesCount > 0 && `(${favoritesCount})`}
+              </Button>
+            </div>
+
             {/* Results */}
             {loading ? (
               <div className="text-center py-12">
@@ -270,9 +294,11 @@ const Artesanato = () => {
             ) : filteredCrafts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-xl text-muted-foreground">
-                  {crafts.length === 0 
-                    ? "Nenhum artesanato cadastrado ainda." 
-                    : "Nenhum artesanato encontrado com os filtros selecionados."}
+                  {showFavoritesOnly 
+                    ? "Você ainda não tem favoritos. Clique no ❤️ para adicionar!"
+                    : crafts.length === 0 
+                      ? "Nenhum artesanato cadastrado ainda." 
+                      : "Nenhum artesanato encontrado com os filtros selecionados."}
                 </p>
               </div>
             ) : (
@@ -281,9 +307,27 @@ const Artesanato = () => {
                   {filteredCrafts.map((craft, index) => (
                     <Card
                       key={craft.id}
-                      className="overflow-hidden bg-card border-border hover-lift animate-fade-in"
+                      className="overflow-hidden bg-card border-border hover-lift animate-fade-in relative group"
                       style={{ animationDelay: `${Math.min(index, 5) * 0.1}s` }}
                     >
+                      {/* Favorite Button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (craft.id) toggleFavorite(craft.id);
+                        }}
+                        className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 hover:bg-background"
+                        aria-label={isFavorite(craft.id || '') ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                      >
+                        <Heart 
+                          className={`w-5 h-5 transition-colors ${
+                            isFavorite(craft.id || '') 
+                              ? 'fill-red-500 text-red-500' 
+                              : 'text-muted-foreground hover:text-red-500'
+                          }`} 
+                        />
+                      </button>
+
                       <div className="aspect-square overflow-hidden">
                         <img
                           src={craft.imageUrls?.[0] || "/placeholder.svg"}
@@ -308,7 +352,9 @@ const Artesanato = () => {
                         
                         <div className="flex gap-2 mb-4 flex-wrap">
                           <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">{craft.categoria}</span>
-                          <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">{craft.aldeia}</span>
+                          <span className="text-xs bg-accent/10 text-accent px-2 py-1 rounded">
+                            <VillageTooltip villageName={craft.aldeia} />
+                          </span>
                         </div>
                         <Button 
                           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
