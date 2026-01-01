@@ -1,11 +1,27 @@
 import { useState, useEffect } from "react";
-import { Plus, Package, Users, Image, Clock } from "lucide-react";
+import { Plus, Package, Users, Image, Clock, FileWarning, MapPin, Download, Database } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getCollectionCount, getRecentActivity, ActivityLog } from "@/lib/firestore";
+import { toast } from "sonner";
+import { 
+  getCollectionCount, 
+  getRecentActivity, 
+  getArtesaos,
+  getArtesanatos,
+  getAldeias,
+  getFotos,
+  getCategorias,
+  ActivityLog,
+  Artesao,
+  Artesanato,
+  Aldeia,
+  Foto,
+  Categoria
+} from "@/lib/firestore";
+import { exportToJSON } from "@/lib/exportUtils";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -15,25 +31,34 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     artesanatos: 0,
     artesaos: 0,
-    fotos: 0
+    fotos: 0,
+    pendentes: 0,
+    aldeias: 0
   });
   const [recentActivity, setRecentActivity] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [backupLoading, setBackupLoading] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const [artesanatosCount, artesaosCount, fotosCount, activity] = await Promise.all([
+      const [artesanatosCount, artesaosData, fotosCount, aldeiasCount, activity] = await Promise.all([
         getCollectionCount("artesanatos"),
-        getCollectionCount("artesaos"),
+        getArtesaos(),
         getCollectionCount("fotos"),
+        getCollectionCount("aldeias"),
         getRecentActivity(10)
       ]);
       
+      // Count pending documentation
+      const pendentes = artesaosData.filter(a => !a.urlTermoAssinado).length;
+      
       setStats({
         artesanatos: artesanatosCount,
-        artesaos: artesaosCount,
-        fotos: fotosCount
+        artesaos: artesaosData.length,
+        fotos: fotosCount,
+        pendentes,
+        aldeias: aldeiasCount
       });
       setRecentActivity(activity);
       setLoading(false);
@@ -42,10 +67,68 @@ const Dashboard = () => {
     loadData();
   }, []);
 
+  const handleBackupJSON = async () => {
+    setBackupLoading(true);
+    try {
+      const [artesanatos, artesaos, fotos, aldeias, categorias] = await Promise.all([
+        getArtesanatos(),
+        getArtesaos(),
+        getFotos(),
+        getAldeias(),
+        getCategorias()
+      ]);
+
+      const backupData = {
+        exportDate: new Date().toISOString(),
+        version: "1.0",
+        data: {
+          artesanatos: artesanatos.map(a => ({
+            ...a,
+            createdAt: a.createdAt?.toDate?.()?.toISOString() || null
+          })),
+          artesaos: artesaos.map(a => ({
+            ...a,
+            createdAt: a.createdAt?.toDate?.()?.toISOString() || null
+          })),
+          fotos: fotos.map(f => ({
+            ...f,
+            createdAt: f.createdAt?.toDate?.()?.toISOString() || null
+          })),
+          aldeias: aldeias.map(a => ({
+            ...a,
+            createdAt: a.createdAt?.toDate?.()?.toISOString() || null
+          })),
+          categorias: categorias.map(c => ({
+            ...c,
+            createdAt: c.createdAt?.toDate?.()?.toISOString() || null
+          }))
+        },
+        totals: {
+          artesanatos: artesanatos.length,
+          artesaos: artesaos.length,
+          fotos: fotos.length,
+          aldeias: aldeias.length,
+          categorias: categorias.length
+        }
+      };
+
+      const dateStr = new Date().toISOString().split('T')[0];
+      exportToJSON(backupData, `backup_awire_${dateStr}`);
+      toast.success("Backup JSON gerado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar backup:", error);
+      toast.error("Erro ao gerar backup.");
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
   const statsConfig = [
     { label: "Total de Produtos", value: stats.artesanatos, icon: Package, color: "text-gold" },
     { label: "Total de Artesãos", value: stats.artesaos, icon: Users, color: "text-green-light" },
     { label: "Total de Fotos", value: stats.fotos, icon: Image, color: "text-gold" },
+    { label: "Docs Pendentes", value: stats.pendentes, icon: FileWarning, color: stats.pendentes > 0 ? "text-destructive" : "text-green-light" },
+    { label: "Total de Aldeias", value: stats.aldeias, icon: MapPin, color: "text-primary" },
   ];
 
   const formatActivityTime = (timestamp: any) => {
@@ -60,13 +143,24 @@ const Dashboard = () => {
       
       <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Bem-vindo(a), {user?.displayName || user?.email || "Administrador"}!
-            </h1>
-            <p className="text-muted-foreground">
-              Gerencie o conteúdo do site AWIRE DIGITAL
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                Bem-vindo(a), {user?.displayName || user?.email || "Administrador"}!
+              </h1>
+              <p className="text-muted-foreground">
+                Gerencie o conteúdo do site AWIRE DIGITAL
+              </p>
+            </div>
+            <Button
+              onClick={handleBackupJSON}
+              disabled={backupLoading}
+              variant="outline"
+              className="border-border/20 hover:bg-green-medium/20"
+            >
+              <Database className="w-4 h-4 mr-2" />
+              {backupLoading ? "Gerando..." : "Backup JSON"}
+            </Button>
           </div>
 
           {loading ? (
@@ -76,15 +170,15 @@ const Dashboard = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
                 {statsConfig.map((stat) => (
-                  <Card key={stat.label} className="p-6 bg-card border-border/10 hover:border-gold/30 transition-all">
+                  <Card key={stat.label} className="p-4 bg-card border-border/10 hover:border-gold/30 transition-all">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">{stat.label}</p>
-                        <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+                        <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                       </div>
-                      <stat.icon className={`w-12 h-12 ${stat.color}`} />
+                      <stat.icon className={`w-8 h-8 ${stat.color}`} />
                     </div>
                   </Card>
                 ))}
