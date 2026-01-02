@@ -50,10 +50,10 @@ const AccessibilityMenu = () => {
     <>
       {/* VLibras Widget - injected via script in index.html */}
 
-      {/* Accessibility Toggle Button */}
+      {/* Accessibility Toggle Button - RIGHT side, below VLibras */}
       <Button
         onClick={() => setOpen(!open)}
-        className="fixed left-4 bottom-8 z-40 w-10 h-10 md:w-12 md:h-12 rounded-full bg-transparent hover:bg-transparent p-0 shadow-lg hover:shadow-xl transition-all duration-300 scale-90 md:scale-100"
+        className="fixed right-4 bottom-[140px] z-40 w-10 h-10 md:w-12 md:h-12 rounded-full bg-transparent hover:bg-transparent p-0 shadow-lg hover:shadow-xl transition-all duration-300 scale-[0.8] md:scale-100"
         aria-label="Menu de Acessibilidade"
       >
         <img 
@@ -63,9 +63,9 @@ const AccessibilityMenu = () => {
         />
       </Button>
 
-      {/* Accessibility Panel */}
+      {/* Accessibility Panel - RIGHT side */}
       {open && (
-        <div className="fixed left-4 bottom-24 z-50 w-72 bg-card border border-border rounded-lg shadow-xl p-4 animate-in slide-in-from-left duration-300">
+        <div className="fixed right-4 bottom-[200px] z-50 w-72 bg-card border border-border rounded-lg shadow-xl p-4 animate-in slide-in-from-right duration-300">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-foreground flex items-center gap-2">
               <Accessibility className="w-5 h-5" />

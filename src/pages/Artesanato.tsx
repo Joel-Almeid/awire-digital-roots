@@ -334,7 +334,8 @@ const Artesanato = () => {
                       <div className="aspect-square overflow-hidden relative">
                         <img
                           src={craft.imageUrls?.[0] || "/placeholder.svg"}
-                          alt={craft.nome}
+                          alt={`${craft.nome} - Artesanato Indígena ${craft.aldeia || ''} - Projeto Awire Digital`}
+                          title={`${craft.nome} - Artesanato Indígena ${craft.aldeia || ''} - Projeto Awire Digital`}
                           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                         />
                         {/* Watermark */}
