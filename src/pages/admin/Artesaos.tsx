@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { exportArtesaosCSV, exportArtesaosPDF } from "@/lib/exportUtils";
 import { uploadDocumentCloudinary } from "@/lib/cloudinaryUpload";
+import { getCloudinaryDownloadUrl, getCloudinaryViewUrl } from "@/lib/cloudinaryUrls";
 import { 
   getArtesaos, 
   addArtesao, 
@@ -410,7 +411,7 @@ const Artesaos = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(formData.urlTermoAssinado, '_blank')}
+                            onClick={() => window.open(getCloudinaryViewUrl(formData.urlTermoAssinado), "_blank", "noopener,noreferrer")}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -542,7 +543,7 @@ const Artesaos = () => {
                   {artesao.urlTermoAssinado && (
                     <div className="flex gap-2 mb-4">
                       <a
-                        href={artesao.urlTermoAssinado}
+                        href={getCloudinaryViewUrl(artesao.urlTermoAssinado)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1"
@@ -557,7 +558,7 @@ const Artesaos = () => {
                         </Button>
                       </a>
                       <a
-                        href={artesao.urlTermoAssinado}
+                        href={getCloudinaryDownloadUrl(artesao.urlTermoAssinado)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1"
