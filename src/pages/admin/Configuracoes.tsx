@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Save, X, Check, Loader2 } from "lucide-react";
+import { Plus, Edit, Trash2, Save, X, Check, Loader2, Eye } from "lucide-react";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -446,51 +446,80 @@ const Configuracoes = () => {
                   {/* Passos do Como Funciona */}
                   <div className="border-t border-border pt-4">
                     <h3 className="text-lg font-semibold text-foreground mb-4">Passos do "Como Funciona"</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <Label htmlFor="passo1">Passo 1</Label>
-                        <Input
-                          id="passo1"
-                          className="bg-background"
-                          value={passo1}
-                          onChange={(e) => setPasso1(e.target.value)}
-                        />
+                    
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Form Fields */}
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="passo1">Passo 1</Label>
+                          <Input
+                            id="passo1"
+                            className="bg-background"
+                            value={passo1}
+                            onChange={(e) => setPasso1(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="passo2">Passo 2</Label>
+                          <Input
+                            id="passo2"
+                            className="bg-background"
+                            value={passo2}
+                            onChange={(e) => setPasso2(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="passo3">Passo 3</Label>
+                          <Input
+                            id="passo3"
+                            className="bg-background"
+                            value={passo3}
+                            onChange={(e) => setPasso3(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="passo4">Passo 4</Label>
+                          <Input
+                            id="passo4"
+                            className="bg-background"
+                            value={passo4}
+                            onChange={(e) => setPasso4(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="passo5">Passo 5</Label>
+                          <Input
+                            id="passo5"
+                            className="bg-background"
+                            value={passo5}
+                            onChange={(e) => setPasso5(e.target.value)}
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="passo2">Passo 2</Label>
-                        <Input
-                          id="passo2"
-                          className="bg-background"
-                          value={passo2}
-                          onChange={(e) => setPasso2(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="passo3">Passo 3</Label>
-                        <Input
-                          id="passo3"
-                          className="bg-background"
-                          value={passo3}
-                          onChange={(e) => setPasso3(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="passo4">Passo 4</Label>
-                        <Input
-                          id="passo4"
-                          className="bg-background"
-                          value={passo4}
-                          onChange={(e) => setPasso4(e.target.value)}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="passo5">Passo 5</Label>
-                        <Input
-                          id="passo5"
-                          className="bg-background"
-                          value={passo5}
-                          onChange={(e) => setPasso5(e.target.value)}
-                        />
+
+                      {/* Live Preview */}
+                      <div className="bg-background rounded-lg p-4 border border-border/20">
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                          <Eye className="w-4 h-4" />
+                          Pré-visualização
+                        </h4>
+                        <div className="space-y-2">
+                          {[passo1, passo2, passo3, passo4, passo5].map((passo, idx) => (
+                            <div key={idx} className="flex items-start gap-3 p-2 rounded bg-green-medium/10">
+                              <div className="w-6 h-6 rounded-full bg-gold text-green-dark flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                {idx + 1}
+                              </div>
+                              <p className="text-sm text-foreground">
+                                {passo || <span className="text-muted-foreground italic">Passo vazio...</span>}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        {notaComoFunciona && (
+                          <div className="mt-3 p-2 rounded bg-green-dark/50 border border-gold/30">
+                            <p className="text-xs text-gold">{notaComoFunciona}</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

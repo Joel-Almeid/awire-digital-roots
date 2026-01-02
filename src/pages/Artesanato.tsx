@@ -328,12 +328,16 @@ const Artesanato = () => {
                         />
                       </button>
 
-                      <div className="aspect-square overflow-hidden">
+                      <div className="aspect-square overflow-hidden relative">
                         <img
                           src={craft.imageUrls?.[0] || "/placeholder.svg"}
                           alt={craft.nome}
                           className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                         />
+                        {/* Watermark */}
+                        <div className="absolute bottom-2 right-2 bg-background/60 backdrop-blur-sm px-2 py-1 rounded text-xs text-foreground/70 font-medium pointer-events-none">
+                          Awire Digital
+                        </div>
                       </div>
                       <div className="p-6">
                         <h3 className="text-xl font-bold text-foreground mb-2">{craft.nome}</h3>

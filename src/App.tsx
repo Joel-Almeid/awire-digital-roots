@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ConsentBanner from "@/components/ConsentBanner";
+import AccessibilityMenu from "@/components/AccessibilityMenu";
 import Index from "./pages/Index";
 import Artesanato from "./pages/Artesanato";
 import ArtesanatoDetalhe from "./pages/ArtesanatoDetalhe";
@@ -54,6 +55,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ConsentBanner />
+            <AccessibilityMenu />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>

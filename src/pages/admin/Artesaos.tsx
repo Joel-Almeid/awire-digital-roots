@@ -531,10 +531,17 @@ const Artesaos = () => {
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-sm text-muted-foreground">Documentação:</span>
                     {artesao.urlTermoAssinado ? (
-                      <Badge className="bg-green-light/20 text-green-light border-green-light/30">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        OK
-                      </Badge>
+                      <div className="group relative">
+                        <Badge className="bg-green-light/20 text-green-light border-green-light/30 cursor-help">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          OK
+                        </Badge>
+                        {artesao.createdAt && (
+                          <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-popover border border-border rounded text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                            Enviado em: {artesao.createdAt.toDate ? artesao.createdAt.toDate().toLocaleDateString('pt-BR') : 'Data não disponível'}
+                          </div>
+                        )}
+                      </div>
                     ) : (
                       <Badge variant="destructive" className="bg-destructive/20 text-destructive border-destructive/30">
                         <XCircle className="w-3 h-3 mr-1" />
