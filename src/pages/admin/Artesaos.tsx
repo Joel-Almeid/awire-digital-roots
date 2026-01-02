@@ -57,18 +57,15 @@ const Artesaos = () => {
   });
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
 
-  const forcePdfFormat = (url: string) => {
-    // Cloudinary PDFs can be stored with resource_type=image.
-    // Inject `f_pdf` right after `/upload/` so Cloudinary returns the correct Content-Type.
+  // Para VER PDFs: converte .pdf para .jpg (mostra página 1 como imagem)
+  // Isso evita erro 401 do Strict Transformations da Cloudinary
+  const getViewUrl = (url: string) => {
     if (!isPdfUrl(url)) return url;
-
-    if (url.includes("/upload/f_pdf/")) return url;
-
-    const marker = "/upload/";
-    if (!url.includes(marker)) return url;
-
-    return url.replace(marker, "/upload/f_pdf/");
+    return url.replace(/\.pdf$/i, ".jpg");
   };
+
+  // Para BAIXAR: usa a URL original limpa (sem transformações)
+  const getDownloadUrl = (url: string) => url;
   
   useEffect(() => {
     loadData();
@@ -405,7 +402,7 @@ const Artesaos = () => {
                   <div className="border-t border-border pt-4">
                     <Label htmlFor="termo" className="flex items-center gap-2">
                       <FileText className="w-4 h-4" />
-                      Termo de Adesão Assinado
+                      Termo de Artesão Assinado
                     </Label>
                     <p className="text-xs text-muted-foreground mb-2">
                       Formatos aceitos: PDF, JPG, PNG (máx. 10MB)
@@ -424,7 +421,7 @@ const Artesaos = () => {
                         <div className="flex gap-2">
                           <Button type="button" variant="outline" size="sm" asChild>
                             <a
-                              href={forcePdfFormat(formData.urlTermoAssinado)}
+                              href={getViewUrl(formData.urlTermoAssinado)}
                               target="_blank"
                               rel="noopener noreferrer"
                               title="Ver"
@@ -582,7 +579,7 @@ const Artesaos = () => {
                           asChild
                         >
                           <a
-                            href={forcePdfFormat(artesao.urlTermoAssinado)}
+                            href={getViewUrl(artesao.urlTermoAssinado)}
                             target="_blank"
                             rel="noopener noreferrer"
                             title="Ver"
@@ -599,7 +596,7 @@ const Artesaos = () => {
                           asChild
                         >
                           <a
-                            href={forcePdfFormat(artesao.urlTermoAssinado)}
+                            href={getDownloadUrl(artesao.urlTermoAssinado)}
                             download
                             target="_blank"
                             rel="noopener noreferrer"
