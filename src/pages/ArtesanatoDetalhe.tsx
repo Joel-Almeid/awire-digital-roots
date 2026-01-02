@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, MessageCircle, ChevronRight } from "lucide-react";
+import { ArrowLeft, MessageCircle, ChevronRight, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
@@ -263,12 +263,27 @@ const ArtesanatoDetalhe = () => {
               </div>
 
               {/* WhatsApp Button */}
-              <a href={whatsappLink} target="_blank" rel="noopener noreferrer">
-                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-6">
-                  <MessageCircle className="w-5 h-5 mr-2" />
-                  Falar com o Artesão no WhatsApp
-                </Button>
-              </a>
+              <div className="flex gap-3">
+                <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="flex-1">
+                  <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg py-6">
+                    <MessageCircle className="w-5 h-5 mr-2" />
+                    Falar com o Artesão
+                  </Button>
+                </a>
+                <a 
+                  href={`https://wa.me/?text=${encodeURIComponent(`Olha que arte incrível do povo Iny: ${product.nome} - ${window.location.href}`)}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <Button 
+                    variant="outline" 
+                    className="h-full px-4 py-6 border-primary text-primary hover:bg-primary/10"
+                    title="Compartilhar no WhatsApp"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </Button>
+                </a>
+              </div>
 
               <p className="text-sm text-muted-foreground text-center mt-4">
                 Entre em contato para negociar preço, frete e forma de pagamento
