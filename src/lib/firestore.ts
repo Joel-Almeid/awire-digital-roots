@@ -462,6 +462,8 @@ export interface Configuracoes {
   passo3?: string;
   passo4?: string;
   passo5?: string;
+  passo6?: string;
+  passo7?: string;
 }
 
 export const getConfiguracoes = async (): Promise<Configuracoes | null> => {

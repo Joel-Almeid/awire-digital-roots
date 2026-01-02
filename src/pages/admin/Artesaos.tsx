@@ -554,15 +554,13 @@ const Artesaos = () => {
                   {artesao.urlTermoAssinado && (
                     <div className="flex gap-2 mb-4">
                       <Button
-                        asChild
                         variant="outline"
                         size="sm"
                         className="flex-1 border-border/20"
+                        onClick={() => handleDownloadTermo(artesao.urlTermoAssinado!, artesao.nome)}
                       >
-                        <a href={artesao.urlTermoAssinado} target="_blank" rel="noreferrer">
-                          <Eye className="w-3 h-3 mr-1" />
-                          Ver
-                        </a>
+                        <Eye className="w-3 h-3 mr-1" />
+                        Ver
                       </Button>
                       <Button
                         variant="outline"

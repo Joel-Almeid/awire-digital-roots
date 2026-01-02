@@ -43,10 +43,10 @@ const HowToBuyButton = () => {
       {/* Floating Button - positioned above WhatsApp */}
       <Button
         onClick={() => setOpen(true)}
-        className="fixed bottom-36 right-8 z-40 w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300"
+        className="fixed bottom-32 md:bottom-36 right-4 md:right-8 z-40 w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 scale-90 md:scale-100"
         aria-label="Como comprar"
       >
-        <HelpCircle className="w-7 h-7" />
+        <HelpCircle className="w-6 h-6 md:w-7 md:h-7" />
       </Button>
 
       {/* Dialog */}

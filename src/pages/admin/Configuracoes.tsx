@@ -33,6 +33,8 @@ const Configuracoes = () => {
   const [passo3, setPasso3] = useState("");
   const [passo4, setPasso4] = useState("");
   const [passo5, setPasso5] = useState("");
+  const [passo6, setPasso6] = useState("");
+  const [passo7, setPasso7] = useState("");
   const [savingConfig, setSavingConfig] = useState(false);
   const [loadingConfig, setLoadingConfig] = useState(true);
 
@@ -68,6 +70,8 @@ const Configuracoes = () => {
       setPasso3(config.passo3 || "Use o botão \"Falar com o Artesão\" para entrar em contato via WhatsApp");
       setPasso4(config.passo4 || "Negocie preço, frete e forma de pagamento diretamente com o artesão");
       setPasso5(config.passo5 || "Receba sua peça exclusiva e autêntica em casa!");
+      setPasso6(config.passo6 || "Tire uma foto, poste no Instagram e marque o projeto para fortalecer a cultura indígena!");
+      setPasso7(config.passo7 || "Ainda com dúvidas? Clique no botão de Ajuda (?) ou no WhatsApp para falar com nosso suporte.");
     } else {
       // Valores padrão
       setTextoSobreProjeto("O projeto de extensão do Instituto Federal do Tocantins (IFTO) que promove a inclusão digital nas comunidades indígenas da Ilha do Bananal.");
@@ -77,6 +81,8 @@ const Configuracoes = () => {
       setPasso3("Use o botão \"Falar com o Artesão\" para entrar em contato via WhatsApp");
       setPasso4("Negocie preço, frete e forma de pagamento diretamente com o artesão");
       setPasso5("Receba sua peça exclusiva e autêntica em casa!");
+      setPasso6("Tire uma foto, poste no Instagram e marque o projeto para fortalecer a cultura indígena!");
+      setPasso7("Ainda com dúvidas? Clique no botão de Ajuda (?) ou no WhatsApp para falar com nosso suporte.");
     }
     setLoadingConfig(false);
   };
@@ -101,8 +107,9 @@ const Configuracoes = () => {
     setSavingConfig(true);
 
     // Mantido para compatibilidade com dados legados no Firestore,
-    // mas agora é gerado automaticamente a partir dos passos 1–5.
-    const textoComoFunciona = [passo1, passo2, passo3, passo4, passo5]
+    // mas agora é gerado automaticamente a partir dos passos 1–7.
+    const textoComoFunciona = [passo1, passo2, passo3, passo4, passo5, passo6, passo7]
+      .filter(p => p.trim())
       .map((p, idx) => `${idx + 1}. ${p}`)
       .join("\n");
 
@@ -115,6 +122,8 @@ const Configuracoes = () => {
       passo3,
       passo4,
       passo5,
+      passo6,
+      passo7,
     });
     setSavingConfig(false);
 
@@ -495,6 +504,24 @@ const Configuracoes = () => {
                             onChange={(e) => setPasso5(e.target.value)}
                           />
                         </div>
+                        <div>
+                          <Label htmlFor="passo6">Passo 6 (Divulgação)</Label>
+                          <Input
+                            id="passo6"
+                            className="bg-background"
+                            value={passo6}
+                            onChange={(e) => setPasso6(e.target.value)}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="passo7">Passo 7 (Suporte)</Label>
+                          <Input
+                            id="passo7"
+                            className="bg-background"
+                            value={passo7}
+                            onChange={(e) => setPasso7(e.target.value)}
+                          />
+                        </div>
                       </div>
 
                       {/* Live Preview */}
@@ -504,7 +531,7 @@ const Configuracoes = () => {
                           Pré-visualização
                         </h4>
                         <div className="space-y-2">
-                          {[passo1, passo2, passo3, passo4, passo5].map((passo, idx) => (
+                          {[passo1, passo2, passo3, passo4, passo5, passo6, passo7].filter(p => p.trim()).map((passo, idx) => (
                             <div key={idx} className="flex items-start gap-3 p-2 rounded bg-green-medium/10">
                               <div className="w-6 h-6 rounded-full bg-gold text-green-dark flex items-center justify-center text-sm font-bold flex-shrink-0">
                                 {idx + 1}
