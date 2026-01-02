@@ -1,11 +1,7 @@
-// Helpers to build Cloudinary URLs safely for view/download behaviors.
-// Rules:
-// - View PDFs: use Google Docs Viewer to ensure compatibility.
-// - View Images: use original URL.
-// - Download Images: force download via fl_attachment.
-// - Download PDFs: keep original URL (no fl_attachment to avoid 401/404).
-
-const isCloudinaryUrl = (url: string) => /https?:\/\/res\.cloudinary\.com\//i.test(url);
+// Helpers for file URLs.
+// IMPORTANT RULE (per latest decision):
+// - NEVER transform the stored URL for view/download.
+// - Always use the raw URL coming from the database (e.g., url/secure_url).
 
 const getLowerPath = (url: string) => {
   try {
@@ -22,38 +18,8 @@ export const isImageUrl = (url: string) => {
   return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(path);
 };
 
-// Google Docs Viewer for universal PDF rendering
-export const getGoogleViewerUrl = (url: string) => {
-  if (!url) return url;
-  const encodedUrl = encodeURIComponent(url);
-  return `https://docs.google.com/gview?embedded=true&url=${encodedUrl}`;
-};
+// Kept for compatibility with existing imports (if any), but intentionally NO-OP.
+export const getCloudinaryViewUrl = (url: string) => url;
 
-const ensureImageAttachment = (url: string) => {
-  if (!isCloudinaryUrl(url)) return url;
-  if (url.includes("/fl_attachment/")) return url;
-
-  if (url.includes("/image/upload/")) {
-    return url.replace("/image/upload/", "/image/upload/fl_attachment/");
-  }
-
-  if (url.includes("/auto/upload/")) {
-    // If upload used /auto/upload, keep download behavior as image attachment.
-    return url.replace("/auto/upload/", "/image/upload/fl_attachment/");
-  }
-
-  return url;
-};
-
-export const getCloudinaryViewUrl = (url: string) => {
-  if (!url) return url;
-  // PDFs: use Google Docs Viewer for universal compatibility.
-  // Images: use original URL directly.
-  return isPdfUrl(url) ? getGoogleViewerUrl(url) : url;
-};
-
-export const getCloudinaryDownloadUrl = (url: string) => {
-  if (!url) return url;
-  // PDFs: keep the original URL exactly as stored (no /raw, no fl_attachment).
-  return isPdfUrl(url) ? url : ensureImageAttachment(url);
-};
+// Kept for compatibility with existing imports (if any), but intentionally NO-OP.
+export const getCloudinaryDownloadUrl = (url: string) => url;
