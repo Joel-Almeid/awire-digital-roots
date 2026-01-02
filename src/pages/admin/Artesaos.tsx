@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { exportArtesaosCSV, exportArtesaosPDF } from "@/lib/exportUtils";
 import { uploadDocumentCloudinary } from "@/lib/cloudinaryUpload";
-import { getCloudinaryDownloadUrl, getCloudinaryViewUrl, isPdfUrl } from "@/lib/cloudinaryUrls";
+import { isPdfUrl } from "@/lib/cloudinaryUrls";
 import { 
   getArtesaos, 
   addArtesao, 
@@ -246,10 +246,6 @@ const Artesaos = () => {
     toast.success("PDF exportado com sucesso!");
   };
 
-  const handleDownloadTermo = (url: string) => {
-    // IMPORTANT: use the original URL from the database without Cloudinary transformations
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -417,7 +413,7 @@ const Artesaos = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(getCloudinaryViewUrl(formData.urlTermoAssinado), "_blank", "noopener,noreferrer")}
+                            onClick={() => window.open(formData.urlTermoAssinado, "_blank", "noopener,noreferrer")}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -564,7 +560,7 @@ const Artesaos = () => {
                       </div>
                       <div className="flex gap-2">
                         <a
-                          href={getCloudinaryViewUrl(artesao.urlTermoAssinado)}
+                          href={artesao.urlTermoAssinado}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex-1"
@@ -579,7 +575,8 @@ const Artesaos = () => {
                           </Button>
                         </a>
                         <a
-                          href={getCloudinaryDownloadUrl(artesao.urlTermoAssinado)}
+                          href={artesao.urlTermoAssinado}
+                          download
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex-1"
