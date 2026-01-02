@@ -173,7 +173,8 @@ const ArtesanatoDetalhe = () => {
                   <>
                     <img
                       src={mainImage}
-                      alt={product.nome}
+                      alt={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
+                      title={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
                       className="w-full h-full object-cover"
                     />
                     {/* Watermark */}
@@ -201,7 +202,8 @@ const ArtesanatoDetalhe = () => {
                     >
                       <img
                         src={image}
-                        alt={`${product.nome} - ${index + 1}`}
+                        alt={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Imagem ${index + 1} - Projeto Awire Digital`}
+                        title={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
                         className="w-full h-full object-cover"
                       />
                       {/* Watermark on thumbnails */}

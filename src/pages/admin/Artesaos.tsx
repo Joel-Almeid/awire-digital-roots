@@ -553,15 +553,21 @@ const Artesaos = () => {
                   {/* Document Actions */}
                   {artesao.urlTermoAssinado && (
                     <div className="flex gap-2 mb-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-border/20"
-                        onClick={() => handleDownloadTermo(artesao.urlTermoAssinado!, artesao.nome)}
+                      <a
+                        href={artesao.urlTermoAssinado}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
                       >
-                        <Eye className="w-3 h-3 mr-1" />
-                        Ver
-                      </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full border-border/20"
+                        >
+                          <Eye className="w-3 h-3 mr-1" />
+                          Ver
+                        </Button>
+                      </a>
                       <Button
                         variant="outline"
                         size="sm"
