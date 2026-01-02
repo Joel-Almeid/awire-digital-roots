@@ -57,18 +57,15 @@ const Artesaos = () => {
   });
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
 
-  const forcePdfFormat = (url: string) => {
-    // Cloudinary PDFs can be stored with resource_type=image.
-    // Inject `f_pdf` right after `/upload/` so Cloudinary returns the correct Content-Type.
+  // Estratégia de visualização: PDF → JPG (mostra página 1 como imagem, bypassa Strict Transformations)
+  const getPreviewUrl = (url: string): string => {
     if (!isPdfUrl(url)) return url;
-
-    if (url.includes("/upload/f_pdf/")) return url;
-
-    const marker = "/upload/";
-    if (!url.includes(marker)) return url;
-
-    return url.replace(marker, "/upload/f_pdf/");
+    // Troca extensão .pdf para .jpg - Cloudinary entrega página 1 como imagem
+    return url.replace(/\.pdf$/i, '.jpg');
   };
+
+  // URL limpa original para download (sem transformações, sem f_pdf, sem fl_attachment)
+  const getCleanDownloadUrl = (url: string): string => url;
   
   useEffect(() => {
     loadData();
@@ -424,7 +421,7 @@ const Artesaos = () => {
                         <div className="flex gap-2">
                           <Button type="button" variant="outline" size="sm" asChild>
                             <a
-                              href={forcePdfFormat(formData.urlTermoAssinado)}
+                              href={getPreviewUrl(formData.urlTermoAssinado)}
                               target="_blank"
                               rel="noopener noreferrer"
                               title="Ver"
@@ -582,10 +579,10 @@ const Artesaos = () => {
                           asChild
                         >
                           <a
-                            href={forcePdfFormat(artesao.urlTermoAssinado)}
+                            href={getPreviewUrl(artesao.urlTermoAssinado)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="Ver"
+                            title="Ver (página 1 como imagem)"
                           >
                             <Eye className="w-3 h-3 mr-1" />
                             Ver
@@ -599,11 +596,11 @@ const Artesaos = () => {
                           asChild
                         >
                           <a
-                            href={forcePdfFormat(artesao.urlTermoAssinado)}
+                            href={getCleanDownloadUrl(artesao.urlTermoAssinado)}
                             download
                             target="_blank"
                             rel="noopener noreferrer"
-                            title="Baixar"
+                            title="Baixar arquivo original"
                           >
                             <Download className="w-3 h-3 mr-1" />
                             Baixar
