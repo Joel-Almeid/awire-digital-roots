@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Users, Download, FileText, Eye, Upload, Loader2, CheckCircle, XCircle, Package, X } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Download, FileText, Eye, Upload, Loader2, CheckCircle, XCircle, Package, X, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { exportArtesaosCSV, exportArtesaosPDF } from "@/lib/exportUtils";
 import { uploadDocumentCloudinary } from "@/lib/cloudinaryUpload";
-import { getCloudinaryDownloadUrl, getCloudinaryViewUrl } from "@/lib/cloudinaryUrls";
+import { getCloudinaryDownloadUrl, getCloudinaryViewUrl, isPdfUrl } from "@/lib/cloudinaryUrls";
 import { 
   getArtesaos, 
   addArtesao, 
@@ -404,8 +404,14 @@ const Artesaos = () => {
                     
                     {formData.urlTermoAssinado ? (
                       <div className="flex items-center gap-4 mt-2 p-3 bg-green-medium/10 rounded-lg">
-                        <CheckCircle className="w-5 h-5 text-green-light" />
-                        <span className="text-sm text-foreground flex-1">Termo anexado</span>
+                        {isPdfUrl(formData.urlTermoAssinado) ? (
+                          <FileText className="w-5 h-5 text-red-500" />
+                        ) : (
+                          <ImageIcon className="w-5 h-5 text-blue-500" />
+                        )}
+                        <span className="text-sm text-foreground flex-1">
+                          {isPdfUrl(formData.urlTermoAssinado) ? "PDF anexado" : "Imagem anexada"}
+                        </span>
                         <div className="flex gap-2">
                           <Button
                             type="button"
@@ -541,67 +547,83 @@ const Artesaos = () => {
 
                   {/* Document Actions */}
                   {artesao.urlTermoAssinado && (
-                    <div className="flex gap-2 mb-4">
-                      <a
-                        href={getCloudinaryViewUrl(artesao.urlTermoAssinado)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1"
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full border-border/20"
+                    <div className="mb-4">
+                      {/* File Type Indicator */}
+                      <div className="flex items-center gap-2 mb-2 text-xs text-muted-foreground">
+                        {isPdfUrl(artesao.urlTermoAssinado) ? (
+                          <>
+                            <FileText className="w-3.5 h-3.5 text-red-500" />
+                            <span>Documento PDF</span>
+                          </>
+                        ) : (
+                          <>
+                            <ImageIcon className="w-3.5 h-3.5 text-blue-500" />
+                            <span>Imagem</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <a
+                          href={getCloudinaryViewUrl(artesao.urlTermoAssinado)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1"
                         >
-                          <Eye className="w-3 h-3 mr-1" />
-                          Ver
-                        </Button>
-                      </a>
-                      <a
-                        href={getCloudinaryDownloadUrl(artesao.urlTermoAssinado)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1"
-                        title="Baixar"
-                      >
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="w-full border-border/20"
-                        >
-                          <Download className="w-3 h-3 mr-1" />
-                          Baixar
-                        </Button>
-                      </a>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
                           <Button
                             variant="outline"
                             size="sm"
-                            className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                            className="w-full border-border/20"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Eye className="w-3 h-3 mr-1" />
+                            Ver
                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remover Termo de Adesão?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Deseja remover o termo anexado de {artesao.nome}? 
-                              O status voltará para "Pendente". Esta ação não exclui o artesão.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={() => handleDeleteTermo(artesao)}
-                              className="bg-destructive hover:bg-destructive/90"
+                        </a>
+                        <a
+                          href={getCloudinaryDownloadUrl(artesao.urlTermoAssinado)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1"
+                          title="Baixar"
+                        >
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full border-border/20"
+                          >
+                            <Download className="w-3 h-3 mr-1" />
+                            Baixar
+                          </Button>
+                        </a>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-destructive/50 text-destructive hover:bg-destructive/10"
                             >
-                              Remover Termo
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remover Termo de Adesão?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Deseja remover o termo anexado de {artesao.nome}? 
+                                O status voltará para "Pendente". Esta ação não exclui o artesão.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteTermo(artesao)}
+                                className="bg-destructive hover:bg-destructive/90"
+                              >
+                                Remover Termo
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
                   )}
 
