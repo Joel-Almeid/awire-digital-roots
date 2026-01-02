@@ -1,8 +1,9 @@
 // Helpers to build Cloudinary URLs safely for view/download behaviors.
 // Rules:
-// - View: always use the original URL (no transformations).
-// - Download: images should force download via fl_attachment.
-//            PDFs must remain as the original URL (no fl_attachment) to avoid 401/404 issues.
+// - View PDFs: use Google Docs Viewer to ensure compatibility.
+// - View Images: use original URL.
+// - Download Images: force download via fl_attachment.
+// - Download PDFs: keep original URL (no fl_attachment to avoid 401/404).
 
 const isCloudinaryUrl = (url: string) => /https?:\/\/res\.cloudinary\.com\//i.test(url);
 
@@ -15,6 +16,18 @@ const getLowerPath = (url: string) => {
 };
 
 export const isPdfUrl = (url: string) => getLowerPath(url).includes(".pdf");
+
+export const isImageUrl = (url: string) => {
+  const path = getLowerPath(url);
+  return /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(path);
+};
+
+// Google Docs Viewer for universal PDF rendering
+export const getGoogleViewerUrl = (url: string) => {
+  if (!url) return url;
+  const encodedUrl = encodeURIComponent(url);
+  return `https://docs.google.com/gview?embedded=true&url=${encodedUrl}`;
+};
 
 const ensureImageAttachment = (url: string) => {
   if (!isCloudinaryUrl(url)) return url;
@@ -33,8 +46,10 @@ const ensureImageAttachment = (url: string) => {
 };
 
 export const getCloudinaryViewUrl = (url: string) => {
-  // "Ver" must never apply transformations.
-  return url;
+  if (!url) return url;
+  // PDFs: use Google Docs Viewer for universal compatibility.
+  // Images: use original URL directly.
+  return isPdfUrl(url) ? getGoogleViewerUrl(url) : url;
 };
 
 export const getCloudinaryDownloadUrl = (url: string) => {
