@@ -3,6 +3,7 @@ import { Instagram, Mail, MapPin } from "lucide-react";
 const logoAwire = "/logo_awiredigital.png";
 import logoIfto from "@/assets/logo-ifto.png";
 import logoNEABI from "@/assets/logo-neabi.png";
+const logoPrefeitura = "/logo-prefeitura.png";
 
 const Footer = () => {
   return (
@@ -38,7 +39,6 @@ const Footer = () => {
             <h4 className="text-base font-semibold text-foreground mb-4">Instituições</h4>
             <ul className="space-y-3">
               <li>
-                
                 <a href="https://portal.ifto.edu.br/formoso" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 group">
                   <img src={logoIfto} alt="IFTO" className="h-8 w-8" />
                   <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">IFTO</span>
@@ -46,20 +46,28 @@ const Footer = () => {
               </li>
 
               <li>
-      <a 
-        href="https://www.instagram.com/neabiformoso?igsh=MTd1MXJqbmZsOWRjbQ=="  
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="flex items-center gap-2 group"
-      >
-        {/* Logo NEABI*/}
-        <img src={logoNEABI} alt="Logo NEABI Formoso" className="h-8 w-8" />
-        <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">NEABI_FORMOSO</span>
-      </a>
-    </li>
+                <a 
+                  href="https://www.instagram.com/neabiformoso?igsh=MTd1MXJqbmZsOWRjbQ=="  
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 group"
+                >
+                  <img src={logoNEABI} alt="Logo NEABI Formoso" className="h-8 w-8" />
+                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">NEABI_FORMOSO</span>
+                </a>
+              </li>
 
-
-              <li><span className="text-sm text-muted-foreground">Secretaria de Cultura</span></li>
+              <li>
+                <a 
+                  href="https://formosodoaraguaia.to.gov.br/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-2 group"
+                >
+                  <img src={logoPrefeitura} alt="Prefeitura de Formoso do Araguaia" className="h-8 w-8 object-contain" />
+                  <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">Prefeitura municipal de Formoso do Araguaia</span>
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -82,9 +90,10 @@ const Footer = () => {
                   href="https://www.instagram.com/ifto.formoso?igsh=ZW1sNGdhYmt5bmFz" 
                   target="_blank" 
                   rel="noopener noreferrer" 
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Instagram className="h-5 w-5" />
+                  <span className="text-sm">Ifto.Formoso</span>
                 </a>
               </li>
             </ul>
@@ -96,7 +105,7 @@ const Footer = () => {
           <div className="flex flex-col gap-4">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <p className="text-sm text-muted-foreground">
-                © 2025 AWIRE DIGITAL. Todos os direitos reservados.
+                © 2026 AWIRE DIGITAL. Todos os direitos reservados.
               </p>
               <div className="flex items-center gap-4 text-sm flex-wrap justify-center">
                 <Link to="/login" className="text-muted-foreground hover:text-primary transition-colors">

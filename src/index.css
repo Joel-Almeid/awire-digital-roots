@@ -157,3 +157,42 @@ All colors MUST be HSL.
     pointer-events: none;
   }
 }
+
+/* Accessibility Styles */
+html.high-contrast {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 5%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 5%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 60 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 80%;
+  --accent: 60 100% 50%;
+  --accent-foreground: 0 0% 0%;
+  --border: 0 0% 40%;
+}
+
+html.large-font {
+  font-size: 120%;
+}
+
+html.large-font body {
+  line-height: 1.6;
+}
+
+/* VLibras positioning */
+.vw-plugin-top-wrapper {
+  z-index: 9999 !important;
+}
+
+[vw-access-button] {
+  position: fixed !important;
+  left: 4px !important;
+  bottom: 100px !important;
+  z-index: 9998 !important;
+}

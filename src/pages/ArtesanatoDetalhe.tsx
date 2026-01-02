@@ -166,15 +166,21 @@ const ArtesanatoDetalhe = () => {
             {/* Gallery */}
             <div>
               <div 
-                className="aspect-square overflow-hidden rounded-lg mb-4 cursor-pointer hover-lift"
+                className="aspect-square overflow-hidden rounded-lg mb-4 cursor-pointer hover-lift relative"
                 onClick={() => mainImage && setLightboxImage(mainImage)}
               >
                 {mainImage ? (
-                  <img
-                    src={mainImage}
-                    alt={product.nome}
-                    className="w-full h-full object-cover"
-                  />
+                  <>
+                    <img
+                      src={mainImage}
+                      alt={product.nome}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* Watermark */}
+                    <div className="absolute bottom-3 right-3 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded text-sm text-foreground/70 font-medium pointer-events-none">
+                      Awire Digital
+                    </div>
+                  </>
                 ) : (
                   <div className="w-full h-full bg-muted flex items-center justify-center">
                     <p className="text-muted-foreground">Sem imagem</p>
@@ -188,7 +194,7 @@ const ArtesanatoDetalhe = () => {
                   {validImages.map((image, index) => (
                     <div
                       key={index}
-                      className={`aspect-square overflow-hidden rounded-lg cursor-pointer hover-lift ${
+                      className={`aspect-square overflow-hidden rounded-lg cursor-pointer hover-lift relative ${
                         mainImage === image ? "ring-2 ring-primary" : ""
                       }`}
                       onClick={() => setMainImage(image)}
@@ -198,6 +204,10 @@ const ArtesanatoDetalhe = () => {
                         alt={`${product.nome} - ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
+                      {/* Watermark on thumbnails */}
+                      <div className="absolute bottom-1 right-1 bg-background/60 backdrop-blur-sm px-1 py-0.5 rounded text-[10px] text-foreground/60 font-medium pointer-events-none">
+                        Awire Digital
+                      </div>
                     </div>
                   ))}
                 </div>
