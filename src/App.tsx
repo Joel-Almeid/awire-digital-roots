@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import ConsentBanner from "@/components/ConsentBanner";
 import AccessibilityMenu from "@/components/AccessibilityMenu";
+import BackToTopButton from "@/components/BackToTopButton";
 import Index from "./pages/Index";
 import Artesanato from "./pages/Artesanato";
 import ArtesanatoDetalhe from "./pages/ArtesanatoDetalhe";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ConsentBanner />
+            <BackToTopButton />
             <AccessibilityMenu />
           </AuthProvider>
         </BrowserRouter>
