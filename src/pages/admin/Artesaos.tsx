@@ -40,13 +40,13 @@ const Artesaos = () => {
   const [editingArtesao, setEditingArtesao] = useState<Artesao | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [selectedTermo, setSelectedTermo] = useState<File | null>(null);
-  
+
   // Modal de produtos
   const [productsModalOpen, setProductsModalOpen] = useState(false);
   const [selectedArtesaoProducts, setSelectedArtesaoProducts] = useState<Artesanato[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [selectedArtesaoName, setSelectedArtesaoName] = useState("");
-  
+
   const [formData, setFormData] = useState({
     nome: "",
     whatsapp: "",
@@ -57,6 +57,67 @@ const Artesaos = () => {
   });
   const [existingPhotoUrl, setExistingPhotoUrl] = useState("");
 
+  const filenameFromUrl = (url: string) => {
+    try {
+      const u = new URL(url);
+      const last = u.pathname.split("/").filter(Boolean).pop();
+      return last || "arquivo";
+    } catch {
+      return "arquivo";
+    }
+  };
+
+  const fetchBlob = async (url: string) => {
+    const res = await fetch(url, { mode: "cors" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.blob();
+  };
+
+  const handleViewFile = async (url?: string) => {
+    if (!url) return;
+
+    // For PDFs, avoid browser trying to render directly from Cloudinary.
+    // We fetch the blob and open an object URL (no URL transformations).
+    try {
+      const isPdf = isPdfUrl(url);
+      if (!isPdf) {
+        window.open(url, "_blank", "noopener,noreferrer");
+        return;
+      }
+
+      toast.message("Abrindo PDF...");
+      const blob = await fetchBlob(url);
+      const objectUrl = URL.createObjectURL(blob);
+      window.open(objectUrl, "_blank", "noopener,noreferrer");
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+    } catch (e) {
+      console.error(e);
+      toast.error("Não foi possível abrir o arquivo.");
+    }
+  };
+
+  const handleDownloadFile = async (url?: string) => {
+    if (!url) return;
+
+    // For PDFs, the `download` attribute may be ignored cross-origin.
+    // Fetch blob and trigger a native download (no URL transformations).
+    try {
+      toast.message("Preparando download...");
+      const blob = await fetchBlob(url);
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = filenameFromUrl(url);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (e) {
+      console.error(e);
+      toast.error("Não foi possível baixar o arquivo.");
+    }
+  };
+  
   useEffect(() => {
     loadData();
   }, []);
@@ -413,7 +474,7 @@ const Artesaos = () => {
                             type="button"
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(formData.urlTermoAssinado, "_blank", "noopener,noreferrer")}
+                            onClick={() => handleViewFile(formData.urlTermoAssinado)}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -559,38 +620,27 @@ const Artesaos = () => {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <a
-                          href={artesao.urlTermoAssinado}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1"
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full flex-1 border-border/20"
+                          onClick={() => handleViewFile(artesao.urlTermoAssinado)}
                         >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full border-border/20"
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            Ver
-                          </Button>
-                        </a>
-                        <a
-                          href={artesao.urlTermoAssinado}
-                          download
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1"
+                          <Eye className="w-3 h-3 mr-1" />
+                          Ver
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full flex-1 border-border/20"
+                          onClick={() => handleDownloadFile(artesao.urlTermoAssinado)}
                           title="Baixar"
                         >
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="w-full border-border/20"
-                          >
-                            <Download className="w-3 h-3 mr-1" />
-                            Baixar
-                          </Button>
-                        </a>
+                          <Download className="w-3 h-3 mr-1" />
+                          Baixar
+                        </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
