@@ -53,10 +53,14 @@ const AccessibilityMenu = () => {
       {/* Accessibility Toggle Button */}
       <Button
         onClick={() => setOpen(!open)}
-        className="fixed left-4 bottom-8 z-40 w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+        className="fixed left-4 bottom-8 z-40 w-10 h-10 md:w-12 md:h-12 rounded-full bg-transparent hover:bg-transparent p-0 shadow-lg hover:shadow-xl transition-all duration-300 scale-90 md:scale-100"
         aria-label="Menu de Acessibilidade"
       >
-        <Accessibility className="w-6 h-6" />
+        <img 
+          src="/logo-acessibilidade.png" 
+          alt="Acessibilidade" 
+          className="w-full h-full object-contain"
+        />
       </Button>
 
       {/* Accessibility Panel */}

@@ -59,6 +59,8 @@ const Artesanato = () => {
   const [passo3, setPasso3] = useState<string>("Use o botão \"Falar com o Artesão\" para entrar em contato via WhatsApp");
   const [passo4, setPasso4] = useState<string>("Negocie preço, frete e forma de pagamento diretamente com o artesão");
   const [passo5, setPasso5] = useState<string>("Receba sua peça exclusiva e autêntica em casa!");
+  const [passo6, setPasso6] = useState<string>("Tire uma foto, poste no Instagram e marque o projeto para fortalecer a cultura indígena!");
+  const [passo7, setPasso7] = useState<string>("Ainda com dúvidas? Clique no botão de Ajuda (?) ou no WhatsApp para falar com nosso suporte.");
 
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1,
@@ -98,6 +100,8 @@ const Artesanato = () => {
         if (configData.passo3) setPasso3(configData.passo3);
         if (configData.passo4) setPasso4(configData.passo4);
         if (configData.passo5) setPasso5(configData.passo5);
+        if (configData.passo6) setPasso6(configData.passo6);
+        if (configData.passo7) setPasso7(configData.passo7);
       }
       
       setLoading(false);
@@ -182,26 +186,12 @@ const Artesanato = () => {
           <Card className="p-8 bg-card border-border">
             <h2 className="text-2xl font-bold text-foreground mb-6 text-center">Como funciona?</h2>
             <ol className="space-y-4 max-w-2xl mx-auto">
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">1</span>
-                <p className="text-muted-foreground">{passo1}</p>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">2</span>
-                <p className="text-muted-foreground">{passo2}</p>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">3</span>
-                <p className="text-muted-foreground">{passo3}</p>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">4</span>
-                <p className="text-muted-foreground">{passo4}</p>
-              </li>
-              <li className="flex gap-4">
-                <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">5</span>
-                <p className="text-muted-foreground">{passo5}</p>
-              </li>
+              {[passo1, passo2, passo3, passo4, passo5, passo6, passo7].filter(p => p.trim()).map((passo, idx) => (
+                <li key={idx} className="flex gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold">{idx + 1}</span>
+                  <p className="text-muted-foreground">{passo}</p>
+                </li>
+              ))}
             </ol>
             <div className="mt-6 p-4 bg-primary/10 rounded-lg">
               <p className="text-sm text-foreground text-center">
@@ -287,9 +277,22 @@ const Artesanato = () => {
 
             {/* Results */}
             {loading ? (
-              <div className="text-center py-12">
-                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Carregando artesanatos...</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="overflow-hidden bg-card border-border">
+                    <div className="aspect-square bg-muted animate-pulse" />
+                    <div className="p-6 space-y-3">
+                      <div className="h-6 bg-muted rounded animate-pulse" />
+                      <div className="h-4 bg-muted rounded w-3/4 animate-pulse" />
+                      <div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
+                      <div className="flex gap-2">
+                        <div className="h-6 w-16 bg-muted rounded animate-pulse" />
+                        <div className="h-6 w-20 bg-muted rounded animate-pulse" />
+                      </div>
+                      <div className="h-10 bg-muted rounded animate-pulse" />
+                    </div>
+                  </Card>
+                ))}
               </div>
             ) : filteredCrafts.length === 0 ? (
               <div className="text-center py-12">

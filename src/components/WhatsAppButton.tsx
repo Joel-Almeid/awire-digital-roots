@@ -34,13 +34,14 @@ const WhatsAppButton = () => {
       onClick={handleClick}
       className="
         fixed bottom-8 right-8 z-50
-        w-20 h-20        
+        w-16 h-16 md:w-20 md:h-20        
         bg-[#25D366]
         rounded-full flex items-center justify-center
         shadow-lg hover-lift hover:bg-green-700 transition-all
+        scale-90 md:scale-100
       "
     >
-      <FaWhatsapp className="w-14 h-14 text-black" />
+      <FaWhatsapp className="w-10 h-10 md:w-14 md:h-14 text-black" />
     </a>
   );
 };
