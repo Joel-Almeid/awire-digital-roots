@@ -245,21 +245,9 @@ const Artesaos = () => {
     toast.success("PDF exportado com sucesso!");
   };
 
-  const getCloudinaryDownloadUrl = (url: string) => {
-    if (!url.includes("cloudinary.com") || !url.includes("/upload/")) return url;
-    if (url.includes("/upload/fl_attachment/")) return url;
-    return url.replace("/upload/", "/upload/fl_attachment/");
-  };
-
-  const handleDownloadTermo = (url: string, nome: string) => {
-    const downloadUrl = getCloudinaryDownloadUrl(url);
-
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = `termo_adesao_${nome.replace(/\s+/g, "_").toLowerCase()}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadTermo = (url: string) => {
+    // IMPORTANT: use the original URL from the database without Cloudinary transformations
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -568,15 +556,22 @@ const Artesaos = () => {
                           Ver
                         </Button>
                       </a>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 border-border/20"
-                        onClick={() => handleDownloadTermo(artesao.urlTermoAssinado!, artesao.nome)}
+                      <a
+                        href={artesao.urlTermoAssinado}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1"
+                        title="Baixar"
                       >
-                        <Download className="w-3 h-3 mr-1" />
-                        Baixar
-                      </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full border-border/20"
+                        >
+                          <Download className="w-3 h-3 mr-1" />
+                          Baixar
+                        </Button>
+                      </a>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button

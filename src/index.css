@@ -192,7 +192,8 @@ html.large-font body {
 
 [vw-access-button] {
   position: fixed !important;
-  left: 4px !important;
-  bottom: 100px !important;
+  right: 16px !important;
+  bottom: 200px !important;
+  left: auto !important;
   z-index: 9998 !important;
 }
