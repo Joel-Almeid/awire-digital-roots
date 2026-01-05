@@ -48,8 +48,14 @@ export interface Artesao {
 // Update artisan name across all products (cascade update)
 export const updateArtesaoWithCascade = async (id: string, data: Partial<Artesao>) => {
   try {
+    // Sempre adiciona updatedAt para rastrear quando foi atualizado
+    const updateData = {
+      ...data,
+      updatedAt: Timestamp.now()
+    };
+
     // Update the artisan document
-    await updateDoc(doc(db, "artesaos", id), data);
+    await updateDoc(doc(db, "artesaos", id), updateData);
     
     // If name was updated, update all products by this artisan
     if (data.nome) {

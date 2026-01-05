@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Users, Download, FileText, Eye, Upload, Loader2, CheckCircle, XCircle, Package, X, Image as ImageIcon } from "lucide-react";
+import ArtesaoCardSkeleton from "@/components/skeletons/ArtesaoCardSkeleton";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
@@ -486,9 +487,10 @@ const Artesaos = () => {
           </div>
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Carregando artesãos...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <ArtesaoCardSkeleton key={i} />
+              ))}
             </div>
           ) : artesaos.length === 0 ? (
             <div className="text-center py-12">
@@ -535,7 +537,11 @@ const Artesaos = () => {
                           <CheckCircle className="w-3 h-3 mr-1" />
                           OK
                         </Badge>
-                        {artesao.createdAt && (
+                        {(artesao as any).updatedAt ? (
+                          <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-popover border border-border rounded text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                            Enviado em: {(artesao as any).updatedAt.toDate ? (artesao as any).updatedAt.toDate().toLocaleDateString('pt-BR') : 'Data não disponível'}
+                          </div>
+                        ) : artesao.createdAt && (
                           <div className="absolute bottom-full right-0 mb-2 px-2 py-1 bg-popover border border-border rounded text-xs text-muted-foreground whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
                             Enviado em: {artesao.createdAt.toDate ? artesao.createdAt.toDate().toLocaleDateString('pt-BR') : 'Data não disponível'}
                           </div>
@@ -592,7 +598,7 @@ const Artesaos = () => {
                           asChild
                         >
                           <a
-                            href={artesao.urlTermoAssinado}
+                            href={getPdfPreviewUrl(artesao.urlTermoAssinado)}
                             download
                             target="_blank"
                             rel="noopener noreferrer"
