@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, Search, Package, X, Download, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Package, X, Download, FileText, Play } from "lucide-react";
 import { toast } from "sonner";
 import { AdminSidebar } from "@/components/AdminSidebar";
 import { Card } from "@/components/ui/card";
@@ -10,12 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { exportArtesanatosCSV, exportArtesanatosPDF } from "@/lib/exportUtils";
+import AdminProductCardSkeleton from "@/components/skeletons/AdminProductCardSkeleton";
+import { uploadMediaCloudinary } from "@/lib/cloudinaryUpload";
 import { 
   getArtesanatos, 
   addArtesanato, 
   updateArtesanato,
   deleteArtesanato, 
-  uploadImageCloudinary, 
   getCategorias, 
   getAldeias,
   getArtesaos,
@@ -101,6 +102,17 @@ const Artesanato = () => {
     setDialogOpen(true);
   };
 
+  // Helper para verificar se é vídeo
+  const isVideoFile = (file: File | null) => {
+    if (!file) return false;
+    return file.type.startsWith('video/');
+  };
+
+  const isVideoUrl = (url: string) => {
+    const videoExtensions = ['.mp4', '.mov', '.webm', '.avi', '.mkv'];
+    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
   const handleImageChange = (index: number, file: File | null) => {
     const newImages = [...selectedImages];
     newImages[index] = file;
@@ -138,17 +150,17 @@ const Artesanato = () => {
     setUploading(true);
 
     try {
-      // Upload das novas imagens para Cloudinary
+      // Upload das novas mídias para Cloudinary
       const finalUrls: string[] = [];
       
       for (let i = 0; i < 3; i++) {
         if (selectedImages[i]) {
-          // Nova imagem selecionada - fazer upload
-          const uploadResult = await uploadImageCloudinary(selectedImages[i]!);
+          // Nova mídia selecionada - fazer upload com resource_type: auto
+          const uploadResult = await uploadMediaCloudinary(selectedImages[i]!);
           if (uploadResult.success) {
             finalUrls.push(uploadResult.url!);
           } else {
-            toast.error(`Erro ao fazer upload da imagem ${i + 1}.`);
+            toast.error(`Erro ao fazer upload da mídia ${i + 1}.`);
             setUploading(false);
             return;
           }
@@ -160,7 +172,7 @@ const Artesanato = () => {
 
       // Garantir que temos pelo menos 1 URL
       if (finalUrls.length === 0) {
-        toast.error("Erro: nenhuma imagem válida.");
+        toast.error("Erro: nenhuma mídia válida.");
         setUploading(false);
         return;
       }
@@ -311,20 +323,27 @@ const Artesanato = () => {
                     />
                   </div>
                   
-                  {/* Upload de 3 Imagens */}
+                  {/* Upload de 3 Mídias */}
                   <div className="space-y-3">
-                    <Label>Imagens do Produto (até 3) *</Label>
+                    <Label>Mídia do Produto (Fotos ou Vídeos - até 3) *</Label>
                     <div className="grid grid-cols-3 gap-4">
                       {[0, 1, 2].map((index) => (
                         <div key={index} className="space-y-2">
-                          <Label className="text-sm text-muted-foreground">Imagem {index + 1}</Label>
+                          <Label className="text-sm text-muted-foreground">Mídia {index + 1}</Label>
                           {existingImageUrls[index] && !selectedImages[index] ? (
                             <div className="relative">
-                              <img 
-                                src={existingImageUrls[index]} 
-                                alt={`Imagem ${index + 1}`} 
-                                className="w-full h-24 object-cover rounded"
-                              />
+                              {isVideoUrl(existingImageUrls[index]) ? (
+                                <div className="w-full h-24 bg-muted rounded flex items-center justify-center relative">
+                                  <Play className="w-8 h-8 text-muted-foreground" />
+                                  <span className="absolute bottom-1 left-1 text-[10px] bg-background/80 px-1 rounded">Vídeo</span>
+                                </div>
+                              ) : (
+                                <img 
+                                  src={existingImageUrls[index]} 
+                                  alt={`Mídia ${index + 1}`} 
+                                  className="w-full h-24 object-cover rounded"
+                                />
+                              )}
                               <Button
                                 type="button"
                                 size="sm"
@@ -342,13 +361,16 @@ const Artesanato = () => {
                           ) : (
                             <Input 
                               type="file" 
-                              accept="image/*" 
+                              accept="image/*,video/*" 
                               className="bg-background text-xs"
                               onChange={(e) => handleImageChange(index, e.target.files?.[0] || null)}
                             />
                           )}
                           {selectedImages[index] && (
-                            <p className="text-xs text-green-400 truncate">✓ {selectedImages[index]!.name}</p>
+                            <p className="text-xs text-green-400 truncate">
+                              ✓ {selectedImages[index]!.name} 
+                              {isVideoFile(selectedImages[index]) && " (Vídeo)"}
+                            </p>
                           )}
                         </div>
                       ))}
@@ -456,9 +478,10 @@ const Artesanato = () => {
           </Card>
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Carregando artesanatos...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <AdminProductCardSkeleton key={i} />
+              ))}
             </div>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-12">
@@ -473,11 +496,23 @@ const Artesanato = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProducts.map((product) => (
                 <Card key={product.id} className="bg-card border-border/10 overflow-hidden hover:border-gold/30 transition-all">
-                  <img 
-                    src={product.imageUrls?.[0] || "/placeholder.svg"} 
-                    alt={product.nome} 
-                    className="w-full h-48 object-cover" 
-                  />
+                  <div className="relative w-full h-48">
+                    {product.imageUrls?.[0] && isVideoUrl(product.imageUrls[0]) ? (
+                      <div className="w-full h-full bg-muted flex items-center justify-center relative">
+                        <Play className="w-12 h-12 text-muted-foreground" />
+                        <span className="absolute bottom-2 left-2 text-xs bg-background/80 px-2 py-1 rounded flex items-center gap-1">
+                          <Play className="w-3 h-3" />
+                          Vídeo
+                        </span>
+                      </div>
+                    ) : (
+                      <img 
+                        src={product.imageUrls?.[0] || "/placeholder.svg"} 
+                        alt={product.nome} 
+                        className="w-full h-full object-cover" 
+                      />
+                    )}
+                  </div>
                   <div className="p-4">
                     <h3 className="font-semibold text-foreground mb-1">{product.nome}</h3>
                     <p className="text-sm text-muted-foreground mb-1">Por: {product.artesaoNome}</p>
@@ -486,7 +521,7 @@ const Artesanato = () => {
                       <span className="bg-green-medium/20 px-2 py-1 rounded">{product.aldeia}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mb-4">
-                      {product.imageUrls?.length || 0} imagem(ns)
+                      {product.imageUrls?.length || 0} mídia(s)
                     </p>
                     <div className="flex gap-2">
                       <Button 

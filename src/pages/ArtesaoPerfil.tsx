@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import ArtesaoPerfilSkeleton from "@/components/skeletons/ArtesaoPerfilSkeleton";
 import { getArtesaoById, getArtesanatosByArtesaoId, Artesanato, Artesao } from "@/lib/firestore";
 
 const ArtesaoPerfil = () => {
@@ -54,12 +55,15 @@ const ArtesaoPerfil = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Carregando perfil...</p>
+        <section className="bg-secondary/30 py-6 mt-20">
+          <div className="container mx-auto px-4 lg:px-8">
+            <Link to="/artesanato" className="inline-flex items-center text-primary hover:text-primary/80 transition-colors">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar para Galeria
+            </Link>
           </div>
-        </div>
+        </section>
+        <ArtesaoPerfilSkeleton />
         <Footer />
       </div>
     );
