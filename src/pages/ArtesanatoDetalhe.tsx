@@ -100,6 +100,11 @@ const ArtesanatoDetalhe = () => {
   // Filtrar apenas URLs válidas
   const validImages = product.imageUrls?.filter(url => url && url.trim() !== "") || [];
 
+  // Verifica se é um vídeo pela extensão
+  const isVideoUrl = (url: string) => {
+    return /\.(mp4|mov|webm|avi|mkv)$/i.test(url);
+  };
+
   // Configurar WhatsApp com mensagem pré-preenchida
   const whatsappNumber = artesao?.whatsapp?.replace(/\D/g, "") || "5563992747396";
   const whatsappMessage = `Olá, tenho interesse no artesanato: ${product.nome}. Poderia me dar mais informações sobre preço e envio?`;
@@ -175,21 +180,37 @@ const ArtesanatoDetalhe = () => {
             <div>
               <div 
                 className="aspect-square overflow-hidden rounded-lg mb-4 cursor-pointer hover-lift relative"
-                onClick={() => mainImage && setLightboxImage(mainImage)}
+                onClick={() => mainImage && !isVideoUrl(mainImage) && setLightboxImage(mainImage)}
               >
                 {mainImage ? (
-                  <>
-                    <img
-                      src={mainImage}
-                      alt={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
-                      title={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
-                      className="w-full h-full object-cover"
-                    />
-                    {/* Watermark */}
-                    <div className="absolute bottom-3 right-3 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded text-sm text-foreground/70 font-medium pointer-events-none">
-                      Awire Digital
-                    </div>
-                  </>
+                  isVideoUrl(mainImage) ? (
+                    <>
+                      <video
+                        src={mainImage}
+                        controls
+                        className="w-full h-full object-cover"
+                      >
+                        Seu navegador não suporta vídeos.
+                      </video>
+                      {/* Watermark */}
+                      <div className="absolute bottom-3 right-3 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded text-sm text-foreground/70 font-medium pointer-events-none">
+                        Awire Digital
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <img
+                        src={mainImage}
+                        alt={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
+                        title={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
+                        className="w-full h-full object-cover"
+                      />
+                      {/* Watermark */}
+                      <div className="absolute bottom-3 right-3 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded text-sm text-foreground/70 font-medium pointer-events-none">
+                        Awire Digital
+                      </div>
+                    </>
+                  )
                 ) : (
                   <div className="w-full h-full bg-muted flex items-center justify-center">
                     <p className="text-muted-foreground">Sem imagem</p>
@@ -200,20 +221,38 @@ const ArtesanatoDetalhe = () => {
               {/* Thumbnails */}
               {validImages.length > 1 && (
                 <div className="grid grid-cols-3 gap-4">
-                  {validImages.map((image, index) => (
+                  {validImages.map((media, index) => (
                     <div
                       key={index}
                       className={`aspect-square overflow-hidden rounded-lg cursor-pointer hover-lift relative ${
-                        mainImage === image ? "ring-2 ring-primary" : ""
+                        mainImage === media ? "ring-2 ring-primary" : ""
                       }`}
-                      onClick={() => setMainImage(image)}
+                      onClick={() => setMainImage(media)}
                     >
-                      <img
-                        src={image}
-                        alt={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Imagem ${index + 1} - Projeto Awire Digital`}
-                        title={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
-                        className="w-full h-full object-cover"
-                      />
+                      {isVideoUrl(media) ? (
+                        <>
+                          <video
+                            src={media}
+                            className="w-full h-full object-cover"
+                            muted
+                          />
+                          {/* Play icon overlay for video thumbnails */}
+                          <div className="absolute inset-0 flex items-center justify-center bg-background/30">
+                            <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center">
+                              <svg className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                              </svg>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <img
+                          src={media}
+                          alt={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Imagem ${index + 1} - Projeto Awire Digital`}
+                          title={`${product.nome} - Artesanato Indígena ${product.aldeia || ''} - Projeto Awire Digital`}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
                       {/* Watermark on thumbnails */}
                       <div className="absolute bottom-1 right-1 bg-background/60 backdrop-blur-sm px-1 py-0.5 rounded text-[10px] text-foreground/60 font-medium pointer-events-none">
                         Awire Digital

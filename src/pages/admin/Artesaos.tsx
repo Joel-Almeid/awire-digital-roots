@@ -63,6 +63,39 @@ const Artesaos = () => {
     if (!isPdfUrl(url)) return url;
     return url.replace(/\.pdf$/i, '.jpg');
   };
+
+  // Função de download forçado via Blob (contorna CORS/401)
+  const handleForceDownload = async (url: string, artesaoNome: string) => {
+    try {
+      // Se for PDF, baixar como JPG
+      const downloadUrl = isPdfUrl(url) ? url.replace(/\.pdf$/i, '.jpg') : url;
+      const extension = isPdfUrl(url) ? 'jpg' : (url.split('.').pop()?.toLowerCase() || 'jpg');
+      
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error('Erro ao baixar arquivo');
+      }
+      
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `termo_${artesaoNome.replace(/\s+/g, '_').toLowerCase()}.${extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(blobUrl);
+      toast.success("Download iniciado!");
+    } catch (error) {
+      console.error("Erro no download:", error);
+      // Fallback: abrir em nova aba
+      const fallbackUrl = isPdfUrl(url) ? url.replace(/\.pdf$/i, '.jpg') : url;
+      window.open(fallbackUrl, '_blank');
+      toast.info("Abrindo em nova aba. Salve manualmente.");
+    }
+  };
   
   useEffect(() => {
     loadData();
@@ -595,18 +628,11 @@ const Artesaos = () => {
                           variant="outline"
                           size="sm"
                           className="w-full flex-1 border-border/20"
-                          asChild
+                          onClick={() => handleForceDownload(artesao.urlTermoAssinado!, artesao.nome)}
+                          title="Baixar"
                         >
-                          <a
-                            href={getPdfPreviewUrl(artesao.urlTermoAssinado)}
-                            download
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Baixar"
-                          >
-                            <Download className="w-3 h-3 mr-1" />
-                            Baixar
-                          </a>
+                          <Download className="w-3 h-3 mr-1" />
+                          Baixar
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
