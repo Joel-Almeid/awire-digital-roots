@@ -75,9 +75,14 @@ const Fotos = () => {
     { type: "image" as const, src: foto23, alt: "Equipe do Projeto AWIRE DIGITAL" },
   ];
 
+  // Verifica se é um vídeo pela extensão
+  const isVideoUrl = (url: string) => {
+    return /\.(mp4|mov|webm|avi|mkv)$/i.test(url);
+  };
+
   // Combinar fotos do Firestore com as estáticas
   const firestoreItems = firestorePhotos.map(foto => ({
-    type: "image" as const,
+    type: isVideoUrl(foto.imageUrl) ? "video" as const : "image" as const,
     src: foto.imageUrl,
     alt: foto.legenda || "Foto do Projeto AWIRE DIGITAL"
   }));
